@@ -272,7 +272,8 @@ function retrySavedApplications() {
   pending.forEach(function(payload) {
     fetch(N8N_WEBHOOK, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(payload)
     })
     .then(function() { submitted++; })
@@ -335,14 +336,14 @@ function submitApplication() {
  
   fetch(N8N_WEBHOOK, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
     body: JSON.stringify(currentPayload)
   })
-  .then(function(res) { return res.json(); })
-  .then(function(data) {
+  .then(function(res) { 
     updateStep('step4','done','Briefing delivered to officer.');
     document.getElementById('processingMsg').classList.add('hidden');
-    showResult(data);
+    showLocalResult(); 
   })
   .catch(function() {
     updateStep('step4','done','Application processed.');
@@ -354,28 +355,6 @@ function submitApplication() {
 function updateStep(id, status, msg) {
   document.getElementById(id).className = 'step ' + status;
   document.getElementById(id + 'msg').textContent = msg;
-}
- 
-function showResult(data) {
-  document.getElementById('processingSection').classList.add('hidden');
-  document.getElementById('resultSection').classList.remove('hidden');
-  var status = data.status || 'pending';
-  var message = data.message || 'Your application is under review.';
-  var box = '';
-  if (status === 'approved' || status === 'auto_approved') {
-    box = '<div class="result-eligible"><h2>Eligible for Loan</h2><p style="font-size:13px;color:#166534;">' + message + '</p></div>';
-  } else if (status === 'declined') {
-    box = '<div class="result-declined"><h2>Not Eligible</h2><p style="font-size:13px;color:#991b1b;">' + message + '</p></div>';
-  } else {
-    box = '<div class="result-pending"><h2>Under Review</h2><p style="font-size:13px;color:#92400e;">' + message + '</p></div>';
-  }
-  document.getElementById('resultBox').innerHTML = box;
-  document.getElementById('resultDetails').innerHTML =
-    '<div class="result-row"><span class="result-label">Member</span><span class="result-value">' + currentPayload.name + ' (' + currentPayload.memberId + ')</span></div>' +
-    '<div class="result-row"><span class="result-label">Loan Amount</span><span class="result-value">KES ' + currentPayload.loanAmount.toLocaleString() + '</span></div>' +
-    (data.officer ? '<div class="result-row"><span class="result-label">Assigned Officer</span><span class="result-value">' + data.officer + '</span></div>' : '') +
-    (data.score ? '<div class="result-row"><span class="result-label">Score</span><span class="result-value">' + data.score + '%</span></div>' : '') +
-    '<div class="result-row"><span class="result-label">Repayment</span><span class="result-value">Aligned to ' + (currentPayload.harvestMonth || 'harvest season') + '</span></div>';
 }
  
 function showLocalResult() {
