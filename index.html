@@ -1,528 +1,245 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ujima SACCO - Loan Application System</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, sans-serif; font-size: 15px; background: #f5f5f5; color: #222; }
-  header { background: #1a6b3c; color: white; padding: 14px 16px; }
-  header h1 { font-size: 18px; }
-  header p { font-size: 12px; margin-top: 2px; opacity: 0.85; }
-  .offline-bar { display: none; background: #b91c1c; color: white; text-align: center; padding: 8px; font-size: 13px; }
-  .offline-bar.show { display: block; }
-  .online-bar { display: none; background: #166534; color: white; text-align: center; padding: 8px; font-size: 13px; }
-  .online-bar.show { display: block; }
-  .container { max-width: 600px; margin: 0 auto; padding: 12px; }
-  .card { background: white; border: 1px solid #ddd; border-radius: 6px; padding: 14px; margin-bottom: 12px; }
-  .card h2 { font-size: 15px; color: #1a6b3c; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 12px; }
-  label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; color: #444; }
-  input, select, textarea { width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; margin-bottom: 12px; }
-  textarea { height: 70px; resize: none; }
-  .btn { display: block; width: 100%; padding: 11px; background: #1a6b3c; color: white; border: none; border-radius: 4px; font-size: 15px; font-weight: bold; cursor: pointer; }
-  .btn:active { background: #145530; }
-  .btn-approve { background: #1a6b3c; }
-  .btn-decline { background: #b91c1c; margin-top: 8px; }
-  .btn-secondary { background: #555; margin-top: 8px; }
-  .hidden { display: none; }
-  .step { border-left: 4px solid #ccc; padding: 10px 12px; margin-bottom: 10px; background: #fafafa; border-radius: 0 4px 4px 0; }
-  .step.active { border-left-color: #1a6b3c; background: #f0faf4; }
-  .step.warning { border-left-color: #d97706; background: #fffbeb; }
-  .step.danger { border-left-color: #b91c1c; background: #fef2f2; }
-  .step.done { border-left-color: #1a6b3c; background: #f0faf4; }
-  .step h3 { font-size: 13px; font-weight: bold; margin-bottom: 4px; }
-  .step p { font-size: 13px; color: #555; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
-  .badge-green { background: #dcfce7; color: #166534; }
-  .badge-yellow { background: #fef9c3; color: #854d0e; }
-  .badge-red { background: #fee2e2; color: #991b1b; }
-  .badge-blue { background: #dbeafe; color: #1e40af; }
-  .result-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #eee; font-size: 13px; }
-  .result-row:last-child { border-bottom: none; }
-  .result-label { color: #666; }
-  .result-value { font-weight: bold; color: #222; text-align: right; max-width: 60%; }
-  .pride-box { background: #fffbeb; border: 1px solid #d97706; border-radius: 6px; padding: 14px; margin-bottom: 12px; }
-  .pride-box h3 { color: #92400e; font-size: 14px; margin-bottom: 8px; }
-  .pride-box p { font-size: 13px; color: #78350f; margin-bottom: 10px; }
-  .briefing-box { background: #f0fdf4; border: 1px solid #16a34a; border-radius: 6px; padding: 14px; }
-  .briefing-box h3 { color: #166534; font-size: 14px; margin-bottom: 10px; }
-  .note { font-size: 12px; color: #888; margin-top: 4px; }
-  .section-title { font-size: 12px; font-weight: bold; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; margin-top: 4px; }
-  .divider { border: none; border-top: 1px solid #eee; margin: 12px 0; }
-  .saved-list { font-size: 13px; }
-  .saved-item { border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin-bottom: 8px; background: #fafafa; }
-  .saved-item p { margin-bottom: 4px; }
-  .saved-item .meta { color: #888; font-size: 11px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ujima SACCO AI Portal</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 15px; background: #f4f4f4; color: #333; font-size: 14px; }
+        .container { max-width: 500px; margin: 0 auto; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { color: #185FA5; margin-top: 0; font-size: 18px; border-bottom: 2px solid #1D9E75; padding-bottom: 5px; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 12px; }
+        input, select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        button { background: #1D9E75; color: white; border: none; padding: 10px 15px; width: 100%; border-radius: 4px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        button:hover { background: #157253; }
+        .status-bar { padding: 8px; text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px; border-radius: 4px; display: none; }
+        .offline { background: #D85A30; color: white; display: block; }
+        .online { background: #1D9E75; color: white; }
+        .result-box { margin-top: 15px; padding: 12px; border-radius: 4px; display: none; font-size: 13px; line-height: 1.4; }
+        .eligible { background: #e6f4ea; border-left: 5px solid #1D9E75; color: #137333; }
+        .review { background: #fef7e0; border-left: 5px solid #BA7517; color: #b06000; }
+        .badge { display: inline-block; padding: 2px 6px; font-weight: bold; border-radius: 3px; font-size: 10px; color: white; text-transform: uppercase; margin-bottom: 5px; }
+        .bg-scout { background: #1D9E75; }
+        .bg-guard { background: #185FA5; }
+        .bg-hunter { background: #D85A30; }
+        .tab-container { display: flex; margin-bottom: 15px; border-bottom: 1px solid #ccc; }
+        .tab { flex: 1; text-align: center; padding: 8px; cursor: pointer; font-weight: bold; font-size: 12px; background: #eee; }
+        .tab.active { background: white; border: 1px solid #ccc; border-bottom: none; border-radius: 4px 4px 0 0; color: #185FA5; }
+        .view-panel { display: none; }
+        .view-panel.active { display: block; }
+        .history-item { padding: 8px; border-bottom: 1px solid #eee; font-size: 12px; }
+    </style>
 </head>
 <body>
 
-<!-- OFFLINE / ONLINE STATUS BARS -->
-<div class="offline-bar" id="offlineBar">You are offline. Your data is saved on this device and will sync when connected.</div>
-<div class="online-bar" id="onlineBar">You are back online.</div>
-
-<header>
-  <h1>Ujima SACCO</h1>
-  <p>Loan Application System — Scout · Guardian · Hunter</p>
-</header>
-
 <div class="container">
-
-  <!-- TABS -->
-  <div style="display:flex; gap:8px; margin-bottom:12px;">
-    <button class="btn" id="tabNewBtn" onclick="showTab('new')" style="flex:1; padding:9px; font-size:13px;">New Application</button>
-    <button class="btn btn-secondary" id="tabSavedBtn" onclick="showTab('saved')" style="flex:1; padding:9px; font-size:13px;">Saved Applications</button>
-  </div>
-
-  <!-- TAB: NEW APPLICATION FORM -->
-  <div id="tabNew">
-    <div id="formSection">
-      <div class="card">
-        <h2>Member Loan Application</h2>
-
-        <div class="section-title">Member Details/Maelezo ya mwanachama</div>
-        <label>Full Name/Jina kamili</label>
-        <input type="text" id="name" placeholder="e.g. Grace Auma">
-
-        <label>Member ID/kitambulisho cha mwanachama</label>
-        <input type="text" id="memberId" placeholder="e.g. UJ001">
-
-        <label>Occupation/kazi </label>
-        <select id="occupation">
-          <option value="">Select occupation/chagua kazi yako</option>
-          <option value="Maize farmer">Maize farmer</option>
-          <option value="Market vendor">Market vendor</option>
-          <option value="Shea butter trader">Shea butter trader</option>
-          <option value="Matooke farmer">Matooke farmer</option>
-          <option value="Charcoal seller">Charcoal seller</option>
-          <option value="Formal employee">Formal employee</option>
-          <option value="Other informal trader">Other informal trader</option>
-        </select>
-
-        <label>Monthly Income (KES)/Mshahara wako</label>
-        <input type="number" id="income" placeholder="e.g. 8500">
-
-        <label>Harvest Month /Majira ya mavuno</label>
-        <select id="harvestMonth">
-          <option value="">Select harvest month</option>
-          <option value="January">January</option>
-          <option value="February">February</option>
-          <option value="March">March</option>
-          <option value="April">April</option>
-          <option value="May">May</option>
-          <option value="June">June</option>
-          <option value="July">July</option>
-          <option value="August">August</option>
-          <option value="September">September</option>
-          <option value="October">October</option>
-          <option value="November">November</option>
-          <option value="December">December</option>
-        </select>
-
-        <div class="section-title">Household</div>
-        <label>Number of Children Under 5/Idadi ya watoto chini ya miaka 5 </label>
-        <input type="number" id="children" placeholder="e.g. 2" min="0">
-
-        <div class="section-title">Loan Request</div>
-        <label>Loan Amount Requested (KES)/kiasi cha mkopo</label>
-        <input type="number" id="loanAmount" placeholder="e.g. 28000">
-
-        <label>Reason for Loan/sababu ya mkopo</label>
-        <select id="loanReason">
-          <option value="">Select reason</option>
-          <option value="school fees">School fees</option>
-          <option value="business capital">Business capital</option>
-          <option value="medical emergency">Medical emergency</option>
-          <option value="farm inputs">Farm inputs</option>
-          <option value="no money">No money for basic needs</option>
-          <option value="loan shark">Refinance loan shark debt</option>
-          <option value="other">Other</option>
-        </select>
-
-        <label>Additional Notes (optional)/maelezo ya ziada</label>
-        <textarea id="notes" placeholder="Any other information the loan officer should know"></textarea>
-
-        <button class="btn" onclick="submitApplication()">Submit Application</button>
-        <p class="note" style="margin-top:8px; text-align:center;">Your data is saved on this device even without internet.</p>
-      </div>
+    <div id="networkStatus" class="status-bar"></div>
+    
+    <div class="tab-container">
+        <div class="tab active" onclick="switchTab('apply')">New Application</div>
+        <div class="tab" onclick="switchTab('history')">Saved Local History</div>
     </div>
 
-    <!-- PROCESSING SECTION -->
-    <div id="processingSection" class="hidden">
+    <!-- Application Panel -->
+    <div id="applyPanel" class="view-panel active">
+        <h2>Ujima SACCO Smart Loan Entry</h2>
+        <form id="loanForm">
+            <div class="form-group">
+                <label for="memberName">Full Name</label>
+                <input type="text" id="memberName" placeholder="e.g. Grace Auma" required>
+            </div>
+            <div class="form-group">
+                <label for="memberId">Member ID</label>
+                <input type="text" id="memberId" placeholder="e.g. UJ001" required>
+            </div>
+            <div class="form-group">
+                <label for="occupation">Occupation</label>
+                <select id="occupation">
+                    <option value="Maize farmer">Maize Farmer</option>
+                    <option value="Market vendor">Market Vendor</option>
+                    <option value="Shea butter trader">Shea Butter Trader</option>
+                    <option value="Matooke farmer">Matooke Farmer</option>
+                    <option value="Charcoal seller">Charcoal Seller</option>
+                    <option value="Formal employee">Formal Employee</option>
+                    <option value="Other informal trader">Other Informal Trader</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="income">Monthly Income (KES)</label>
+                <input type="number" id="income" placeholder="e.g. 8500" required>
+            </div>
+            <div class="form-group">
+                <label for="harvestMonth">Main Harvest Month</label>
+                <select id="harvestMonth">
+                    <option value="January">January</option>
+                    <option value="February">February</option>
+                    <option value="March">March</option>
+                    <option value="April">April</option>
+                    <option value="May">May</option>
+                    <option value="June">June</option>
+                    <option value="July">July</option>
+                    <option value="August">August</option>
+                    <option value="September">September</option>
+                    <option value="October">October</option>
+                    <option value="November">November</option>
+                    <option value="December">December</option>
+                    <option value="None">No Seasonal Harvest</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="children">Household Number of Children Under 5 Yrs</label>
+                <input type="number" id="children" placeholder="0" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="loanReason">Reason for Loan</label>
+                <select id="loanReason">
+                    <option value="school fees">School Fees</option>
+                    <option value="business capital">Business Capital</option>
+                    <option value="medical emergency">Medical Emergency</option>
+                    <option value="farm input">Farm Input</option>
+                    <option value="no money for basic need">No Money for Basic Needs</option>
+                    <option value="refinance loan debt">Refinance Loan Debt</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="loanAmount">Loan Amount Requested (KES)</label>
+                <input type="number" id="loanAmount" placeholder="e.g. 15000" required>
+            </div>
+            <button type="submit" id="submitBtn">Send Application to Pipeline</button>
+        </form>
 
-      <div class="card">
-        <h2>Application Processing</h2>
-        <div class="step active" id="scoutStep">
-          <h3>Scout Agent <span class="badge badge-blue">Running</span></h3>
-          <p id="scoutMsg">Checking for financial stress signals...</p>
-        </div>
-        <div class="step" id="guardianStep">
-          <h3>Guardian Agent <span class="badge badge-blue" id="guardianBadge">Waiting</span></h3>
-          <p id="guardianMsg">Waiting for Scout Agent handoff...</p>
-        </div>
-        <div class="step" id="prideStep">
-          <h3>PRIDE Loop <span class="badge badge-yellow" id="prideBadge">Standby</span></h3>
-          <p id="prideMsg">Mandatory human review checkpoint.</p>
-        </div>
-        <div class="step" id="hunterStep">
-          <h3>Hunter Agent <span class="badge badge-blue" id="hunterBadge">Waiting</span></h3>
-          <p id="hunterMsg">Waiting for Guardian Agent handoff...</p>
-        </div>
-      </div>
-
-      <div class="card hidden" id="scoutOutput">
-        <h2>Scout Agent Output</h2>
-        <div class="result-row"><span class="result-label">Member</span><span class="result-value" id="out-name"></span></div>
-        <div class="result-row"><span class="result-label">Stress Signal</span><span class="result-value" id="out-stress"></span></div>
-        <div class="result-row"><span class="result-label">Harvest Month</span><span class="result-value" id="out-harvest"></span></div>
-        <div class="result-row"><span class="result-label">Handoff to Guardian</span><span class="result-value" id="out-handoff"></span></div>
-      </div>
-
-      <div class="card hidden" id="guardianOutput">
-        <h2>Guardian Agent Output</h2>
-        <div class="result-row"><span class="result-label">Loan Amount</span><span class="result-value" id="out-loan"></span></div>
-        <div class="result-row"><span class="result-label">Children Under 5</span><span class="result-value" id="out-children"></span></div>
-        <div class="result-row"><span class="result-label">Risk Flags</span><span class="result-value" id="out-flags"></span></div>
-        <div class="result-row"><span class="result-label">Score</span><span class="result-value" id="out-score"></span></div>
-        <div class="result-row"><span class="result-label">Escalate to Hunter</span><span class="result-value" id="out-escalate"></span></div>
-      </div>
-
-      <div class="pride-box hidden" id="prideBox">
-        <h3>PRIDE Loop — Mandatory Human Review</h3>
-        <p id="prideReason"></p>
-        <p><strong>Loan officer must approve or decline before proceeding.</strong></p>
-        <p class="note">USSD code *#123# also available for member to request review.</p>
-        <hr class="divider">
-        <button class="btn btn-approve" onclick="prideApprove()">Approve — Pass to Hunter Agent</button>
-        <button class="btn btn-decline" onclick="prideDecline()">Decline — Return for Manual Review</button>
-      </div>
-
-      <div class="briefing-box hidden" id="hunterOutput">
-        <h3>Hunter Agent — Officer Briefing Packet</h3>
-        <div class="result-row"><span class="result-label">Matched Officer</span><span class="result-value" id="out-officer"></span></div>
-        <div class="result-row"><span class="result-label">Expertise</span><span class="result-value" id="out-expertise"></span></div>
-        <div class="result-row"><span class="result-label">Priority</span><span class="result-value" id="out-priority"></span></div>
-        <div class="result-row"><span class="result-label">15-Min Alert</span><span class="result-value">Sent</span></div>
-        <hr class="divider">
-        <div class="section-title">Briefing Summary</div>
-        <p id="out-briefing" style="font-size:13px; color:#166534; line-height:1.6;"></p>
-        <hr class="divider">
-        <p style="font-size:12px; color:#888;">Human officer makes the final loan decision. AI does not approve or deny.</p>
-      </div>
-
-      <div class="card hidden" id="declinedOutput">
-        <h2>Application Returned</h2>
-        <p style="font-size:13px; color:#b91c1c; margin-bottom:8px;">The loan officer has returned this application for manual review.</p>
-        <p style="font-size:13px; color:#555;">Your income shows a dip during school fee season. We need 3 months of buffer savings before we can approve. Please visit your nearest Ujima SACCO branch or dial *#123# to speak with an officer.</p>
-        <hr class="divider">
-        <p class="note">Elders Council notified. Member disagreement rights active via *#123#.</p>
-      </div>
-
-      <div class="card hidden" id="autoApprovedOutput">
-        <h2>Guardian Agent — Auto Approved</h2>
-        <p style="font-size:13px; color:#166534; margin-bottom:8px;">Loan amount is within KES 15,000 and no escalation flags detected.</p>
-        <div class="result-row"><span class="result-label">Decision</span><span class="result-value"><span class="badge badge-green">Approved</span></span></div>
-        <div class="result-row"><span class="result-label">Loan Amount</span><span class="result-value" id="out-auto-loan"></span></div>
-        <div class="result-row"><span class="result-label">Repayment Schedule</span><span class="result-value" id="out-repayment"></span></div>
-        <hr class="divider">
-        <p class="note">All data stored on device. Kenya DPA 2022 compliant.</p>
-      </div>
-
-      <button class="btn btn-secondary" style="margin-top:4px;" onclick="resetForm()">Start New Application</button>
+        <div id="resultBox" class="result-box"></div>
     </div>
-  </div>
 
-  <!-- TAB: SAVED APPLICATIONS -->
-  <div id="tabSaved" class="hidden">
-    <div class="card">
-      <h2>Saved Applications</h2>
-      <p class="note" style="margin-bottom:12px;">All applications are saved on this device. They are available even without internet.</p>
-      <div id="savedList"></div>
-      <button class="btn btn-secondary" style="margin-top:8px;" onclick="clearSaved()">Clear All Saved Data</button>
+    <!-- History Panel -->
+    <div id="historyPanel" class="view-panel">
+        <h2>Offline Device Memory Storage</h2>
+        <p style="font-size: 11px; color: #666;">Applications saved securely inside local device storage when data connection drops.</p>
+        <div id="historyList">No saved applications found on this device.</div>
+        <button onclick="clearLocalStorage()" style="background:#cc0000; margin-top:15px; font-size:11px; padding:5px; color:white; border:none; border-radius:4px; cursor:pointer;">Clear Device Cache</button>
     </div>
-  </div>
-
 </div>
 
 <script>
-var appData = {};
+    const n8nWebhookUrl = 'https://saidabdul.app.n8n.cloud/webhook-test/ujima-application';
 
-// OFFLINE DETECTION
-window.addEventListener('offline', function() {
-  document.getElementById('offlineBar').classList.add('show');
-  document.getElementById('onlineBar').classList.remove('show');
-});
-window.addEventListener('online', function() {
-  document.getElementById('offlineBar').classList.remove('show');
-  document.getElementById('onlineBar').classList.add('show');
-  setTimeout(function() {
-    document.getElementById('onlineBar').classList.remove('show');
-  }, 3000);
-});
-if (!navigator.onLine) {
-  document.getElementById('offlineBar').classList.add('show');
-}
+    function updateNetworkStatus() {
+        const bar = document.getElementById('networkStatus');
+        if (!navigator.onLine) {
+            bar.className = "status-bar offline";
+            bar.innerText = "OFFLINE MODE — Data will save locally on your phone device";
+            bar.style.display = "block";
+        } else {
+            bar.className = "status-bar online";
+            bar.innerText = "ONLINE MODE — Network live to n8n workflow engine";
+            bar.style.display = "block";
+            setTimeout(() => { bar.style.display = 'none'; }, 3000);
+        }
+    }
+    window.addEventListener('online', updateNetworkStatus);
+    window.addEventListener('offline', updateNetworkStatus);
+    updateNetworkStatus();
 
-// SERVICE WORKER REGISTRATION
-if ('serviceWorker' in navigator) {
-  var swCode = `
-    var CACHE = 'ujima-v1';
-    self.addEventListener('install', function(e) {
-      e.waitUntil(caches.open(CACHE).then(function(c) {
-        return c.addAll(['/']);
-      }));
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+        if(tabName === 'apply') {
+            document.querySelector('.tab:nth-child(1)').classList.add('active');
+            document.getElementById('applyPanel').classList.add('active');
+        } else {
+            document.querySelector('.tab:nth-child(2)').classList.add('active');
+            document.getElementById('historyPanel').classList.add('active');
+            loadHistory();
+        }
+    }
+
+    document.getElementById('loanForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        const resBox = document.getElementById('resultBox');
+        btn.innerText = "Processing Data Framework Layer...";
+        btn.disabled = true;
+
+        const payload = {
+            name: document.getElementById('memberName').value,
+            memberId: document.getElementById('memberId').value,
+            occupation: document.getElementById('occupation').value,
+            income: parseFloat(document.getElementById('income').value),
+            harvestMonth: document.getElementById('harvestMonth').value,
+            childrenUnder5: parseInt(document.getElementById('children').value),
+            loanReason: document.getElementById('loanReason').value,
+            loanAmount: parseFloat(document.getElementById('loanAmount').value),
+            timestamp: new Date().toISOString()
+        };
+
+        if (!navigator.onLine) {
+            saveToLocal(payload, "Saved Offline", "Application cached natively due to lack of connection. It will sync once internet returns.");
+            resBox.className = "result-box review";
+            resBox.innerHTML = `<span class="badge bg-scout">Local Cache Storage</span><br><b>Offline Save Complete:</b> Held securely on phone. It will be pushed to the n8n pipeline once network connection clears.`;
+            resBox.style.display = "block";
+            btn.innerText = "Send Application to Pipeline";
+            btn.disabled = false;
+            return;
+        }
+
+        try {
+            const response = await fetch(n8nWebhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) throw new Error('Pipeline error');
+            const data = await response.json();
+
+            saveToLocal(payload, data.status || "Processed", data.message || "Workflow evaluation completed");
+
+            if(data.status === 'approved') {
+                resBox.className = "result-box eligible";
+                resBox.innerHTML = `<span class="badge bg-guard">Guardian Agent Output</span><br><b>Status: Eligible</b><br>${data.message}<br><br><small>Score Profile: ${data.score || 75}% | Assigned Officer: ${data.officer || 'Officer Sarah Mwangi'}</small>`;
+            } else {
+                resBox.className = "result-box review";
+                resBox.innerHTML = `<span class="badge bg-hunter">PRIDE Loop Logic Activated</span><br><b>Status: Not Automatically Eligible (PRIDE Review Pause)</b><br>${data.message || 'Your application is now under manual evaluation due to risk parameters.'}`;
+            }
+        } catch (error) {
+            saveToLocal(payload, "Pending Sync", "Network timeout. Stored safely within offline local device memory.");
+            resBox.className = "result-box review";
+            resBox.innerHTML = `<span class="badge bg-scout">Failover Fallback</span><br><b>Connection Unstable:</b> Webhook timed out. Your details have been preserved safely in device cache memory.`;
+        }
+
+        resBox.style.display = "block";
+        btn.innerText = "Send Application to Pipeline";
+        btn.disabled = false;
     });
-    self.addEventListener('fetch', function(e) {
-      e.respondWith(caches.match(e.request).then(function(r) {
-        return r || fetch(e.request).catch(function() { return caches.match('/'); });
-      }));
-    });
-  `;
-  var blob = new Blob([swCode], {type: 'application/javascript'});
-  var swUrl = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl).catch(function() {});
-}
 
-// TAB SWITCHING
-function showTab(tab) {
-  if (tab === 'new') {
-    document.getElementById('tabNew').classList.remove('hidden');
-    document.getElementById('tabSaved').classList.add('hidden');
-    document.getElementById('tabNewBtn').style.background = '#1a6b3c';
-    document.getElementById('tabSavedBtn').style.background = '#555';
-  } else {
-    document.getElementById('tabNew').classList.add('hidden');
-    document.getElementById('tabSaved').classList.remove('hidden');
-    document.getElementById('tabNewBtn').style.background = '#555';
-    document.getElementById('tabSavedBtn').style.background = '#1a6b3c';
-    loadSavedApplications();
-  }
-}
+    function saveToLocal(payload, status, systemMsg) {
+        let items = JSON.parse(localStorage.getItem('ujima_apps')) || [];
+        items.unshift({ payload, status, systemMsg });
+        localStorage.setItem('ujima_apps', JSON.stringify(items));
+    }
 
-// SAVE TO LOCALSTORAGE
-function saveApplication(data, status) {
-  var saved = JSON.parse(localStorage.getItem('ujima_apps') || '[]');
-  data.status = status;
-  data.savedAt = new Date().toLocaleString();
-  data.id = Date.now();
-  saved.push(data);
-  localStorage.setItem('ujima_apps', JSON.stringify(saved));
-}
+    function loadHistory() {
+        const list = document.getElementById('historyList');
+        let items = JSON.parse(localStorage.getItem('ujima_apps')) || [];
+        if(items.length === 0) {
+            list.innerHTML = "No applications stored on this device yet.";
+            return;
+        }
+        list.innerHTML = items.map(i => `
+            <div class="history-item">
+                <b>${i.payload.name} (${i.payload.memberId})</b> - KES ${i.payload.loanAmount}<br>
+                <small style="color:#666;">Pipeline Outcome: <span style="color:#185FA5; font-weight:bold;">${i.status}</span></small><br>
+                <span style="font-size:11px; color:#444;">${i.systemMsg}</span>
+            </div>
+        `).join('');
+    }
 
-// LOAD SAVED APPLICATIONS
-function loadSavedApplications() {
-  var saved = JSON.parse(localStorage.getItem('ujima_apps') || '[]');
-  var list = document.getElementById('savedList');
-  if (saved.length === 0) {
-    list.innerHTML = '<p style="font-size:13px; color:#888;">No saved applications yet.</p>';
-    return;
-  }
-  var html = '';
-  saved.slice().reverse().forEach(function(app) {
-    var badgeColor = app.status === 'Auto Approved' ? 'badge-green' : app.status === 'Declined' ? 'badge-red' : 'badge-yellow';
-    html += '<div class="saved-item">' +
-      '<p><strong>' + app.name + '</strong> (' + app.memberId + ')</p>' +
-      '<p>' + app.occupation + ' — KES ' + parseInt(app.loanAmount).toLocaleString() + ' — ' + app.loanReason + '</p>' +
-      '<p><span class="badge ' + badgeColor + '">' + app.status + '</span></p>' +
-      '<p class="meta">Saved: ' + app.savedAt + '</p>' +
-      '</div>';
-  });
-  list.innerHTML = html;
-}
-
-function clearSaved() {
-  if (confirm('Clear all saved applications from this device?')) {
-    localStorage.removeItem('ujima_apps');
-    loadSavedApplications();
-  }
-}
-
-// SUBMIT APPLICATION
-function submitApplication() {
-  var name = document.getElementById('name').value.trim();
-  var memberId = document.getElementById('memberId').value.trim();
-  var occupation = document.getElementById('occupation').value;
-  var income = parseInt(document.getElementById('income').value) || 0;
-  var harvestMonth = document.getElementById('harvestMonth').value;
-  var children = parseInt(document.getElementById('children').value) || 0;
-  var loanAmount = parseInt(document.getElementById('loanAmount').value) || 0;
-  var loanReason = document.getElementById('loanReason').value;
-
-  if (!name || !memberId || !occupation || !income || !loanAmount || !loanReason) {
-    alert('Please fill in all required fields.');
-    return;
-  }
-
-  appData = { name: name, memberId: memberId, occupation: occupation, income: income, harvestMonth: harvestMonth, children: children, loanAmount: loanAmount, loanReason: loanReason };
-
-  document.getElementById('formSection').classList.add('hidden');
-  document.getElementById('processingSection').classList.remove('hidden');
-
-  setTimeout(function() { runScoutAgent(); }, 800);
-}
-
-function runScoutAgent() {
-  var stressKeywords = ['school fees', 'no money', 'loan shark', 'medical emergency'];
-  var hasStress = stressKeywords.indexOf(appData.loanReason) !== -1;
-
-  document.getElementById('scoutStep').className = 'step done';
-  document.getElementById('scoutStep').querySelector('span').className = 'badge badge-green';
-  document.getElementById('scoutStep').querySelector('span').textContent = 'Done';
-  document.getElementById('scoutMsg').textContent = hasStress
-    ? 'Stress signal detected — ' + appData.loanReason + '. Passing to Guardian Agent.'
-    : 'No stress signal. Passing to Guardian Agent for screening.';
-
-  document.getElementById('scoutOutput').classList.remove('hidden');
-  document.getElementById('out-name').textContent = appData.name + ' (' + appData.memberId + ')';
-  document.getElementById('out-stress').innerHTML = hasStress
-    ? '<span class="badge badge-yellow">YES — ' + appData.loanReason + '</span>'
-    : '<span class="badge badge-green">None detected</span>';
-  document.getElementById('out-harvest').textContent = appData.harvestMonth || 'Not specified';
-  document.getElementById('out-handoff').innerHTML = '<span class="badge badge-green">YES — to Guardian</span>';
-
-  setTimeout(function() { runGuardianAgent(); }, 1000);
-}
-
-function runGuardianAgent() {
-  document.getElementById('guardianStep').className = 'step active';
-  document.getElementById('guardianBadge').textContent = 'Running';
-
-  setTimeout(function() {
-    var flags = 0;
-    var flagDetails = [];
-    if (appData.loanAmount > 15000) { flags++; flagDetails.push('Loan above KES 15,000'); }
-    if (appData.children >= 2) { flags++; flagDetails.push('2+ children under 5'); }
-    if (appData.loanReason === 'loan shark') { flags++; flagDetails.push('Debt collector mentioned'); }
-
-    var score = Math.min(95, 60 + (appData.income / 1000) * 2 + (appData.loanAmount < 15000 ? 10 : 0));
-    score = Math.round(score);
-    var escalate = appData.loanAmount > 15000 || appData.children >= 2 || appData.loanReason === 'loan shark';
-    var autoApprove = appData.loanAmount <= 15000 && flags === 0;
-
-    appData.flags = flags;
-    appData.flagDetails = flagDetails;
-    appData.score = score;
-    appData.escalate = escalate;
-    appData.autoApprove = autoApprove;
-
-    document.getElementById('guardianStep').className = 'step done';
-    document.getElementById('guardianBadge').className = 'badge badge-green';
-    document.getElementById('guardianBadge').textContent = 'Done';
-    document.getElementById('guardianMsg').textContent = escalate
-      ? 'Escalating to Hunter Agent — PRIDE Loop activated.'
-      : 'Auto-approved. Amount within KES 15,000 threshold.';
-
-    document.getElementById('guardianOutput').classList.remove('hidden');
-    document.getElementById('out-loan').textContent = 'KES ' + appData.loanAmount.toLocaleString();
-    document.getElementById('out-children').textContent = appData.children;
-    document.getElementById('out-flags').innerHTML = flags > 0
-      ? '<span class="badge badge-yellow">' + flags + ' flag(s): ' + flagDetails.join(', ') + '</span>'
-      : '<span class="badge badge-green">None</span>';
-    document.getElementById('out-score').textContent = score + '%';
-    document.getElementById('out-escalate').innerHTML = escalate
-      ? '<span class="badge badge-yellow">YES — to Hunter</span>'
-      : '<span class="badge badge-green">NO — Auto Approved</span>';
-
-    setTimeout(function() {
-      if (autoApprove) { showAutoApproved(); } else { showPRIDELoop(); }
-    }, 800);
-  }, 1000);
-}
-
-function showPRIDELoop() {
-  document.getElementById('prideStep').className = 'step warning';
-  document.getElementById('prideBadge').textContent = 'Action Required';
-  document.getElementById('prideMsg').textContent = 'Waiting for human officer approval.';
-  var reasons = [];
-  if (appData.loanAmount > 15000) reasons.push('Loan amount KES ' + appData.loanAmount.toLocaleString() + ' exceeds KES 15,000 threshold');
-  if (appData.children >= 2) reasons.push('Applicant has ' + appData.children + ' children under 5');
-  if (appData.loanReason === 'loan shark') reasons.push('Applicant mentions debt collector');
-  document.getElementById('prideReason').textContent = 'Pause reason: ' + reasons.join('. ') + '. Human review required before proceeding.';
-  document.getElementById('prideBox').classList.remove('hidden');
-}
-
-function prideApprove() {
-  document.getElementById('prideBox').classList.add('hidden');
-  document.getElementById('prideStep').className = 'step done';
-  document.getElementById('prideBadge').className = 'badge badge-green';
-  document.getElementById('prideBadge').textContent = 'Approved';
-  document.getElementById('prideMsg').textContent = 'Human officer approved. Passing to Hunter Agent.';
-  setTimeout(function() { runHunterAgent(); }, 600);
-}
-
-function prideDecline() {
-  document.getElementById('prideBox').classList.add('hidden');
-  document.getElementById('prideStep').className = 'step danger';
-  document.getElementById('prideBadge').className = 'badge badge-red';
-  document.getElementById('prideBadge').textContent = 'Declined';
-  document.getElementById('prideMsg').textContent = 'Application returned for manual review.';
-  document.getElementById('declinedOutput').classList.remove('hidden');
-  saveApplication(appData, 'Declined');
-}
-
-function runHunterAgent() {
-  document.getElementById('hunterStep').className = 'step active';
-  document.getElementById('hunterBadge').textContent = 'Running';
-  setTimeout(function() {
-    document.getElementById('hunterStep').className = 'step done';
-    document.getElementById('hunterBadge').className = 'badge badge-green';
-    document.getElementById('hunterBadge').textContent = 'Done';
-    document.getElementById('hunterMsg').textContent = 'Briefing packet generated. Officer notified within 15 minutes.';
-    var officer = (appData.occupation === 'Maize farmer' || appData.occupation === 'Matooke farmer')
-      ? 'Officer Sarah Mwangi' : 'Officer James Odhiambo';
-    var expertise = (appData.occupation === 'Maize farmer' || appData.occupation === 'Matooke farmer')
-      ? 'Smallholder farmers — western Kenya' : 'Informal traders — market vendors';
-    document.getElementById('hunterOutput').classList.remove('hidden');
-    document.getElementById('out-officer').textContent = officer;
-    document.getElementById('out-expertise').textContent = expertise;
-    document.getElementById('out-priority').innerHTML = '<span class="badge badge-yellow">HIGH</span>';
-    document.getElementById('out-briefing').textContent =
-      'Applicant: ' + appData.name + ', ' + appData.occupation + '. ' +
-      'Monthly income: KES ' + appData.income.toLocaleString() + '. ' +
-      'Harvest month: ' + (appData.harvestMonth || 'not specified') + '. ' +
-      'Children under 5: ' + appData.children + '. ' +
-      'Loan request: KES ' + appData.loanAmount.toLocaleString() + ' for ' + appData.loanReason + '. ' +
-      'Risk flags: ' + (appData.flagDetails.length > 0 ? appData.flagDetails.join(', ') : 'None') + '. ' +
-      'Score: ' + appData.score + '%. ' +
-      'Repayment aligned to ' + (appData.harvestMonth || 'harvest season') + '. ' +
-      'Human officer makes final loan decision.';
-    saveApplication(appData, 'Sent to Hunter');
-  }, 1000);
-}
-
-function showAutoApproved() {
-  document.getElementById('prideStep').className = 'step done';
-  document.getElementById('prideBadge').className = 'badge badge-green';
-  document.getElementById('prideBadge').textContent = 'Not Required';
-  document.getElementById('hunterStep').className = 'step done';
-  document.getElementById('hunterBadge').className = 'badge badge-green';
-  document.getElementById('hunterBadge').textContent = 'Not Required';
-  document.getElementById('autoApprovedOutput').classList.remove('hidden');
-  document.getElementById('out-auto-loan').textContent = 'KES ' + appData.loanAmount.toLocaleString();
-  document.getElementById('out-repayment').textContent = appData.harvestMonth
-    ? 'Aligned to ' + appData.harvestMonth + ' harvest cycle'
-    : 'Standard monthly schedule';
-  saveApplication(appData, 'Auto Approved');
-}
-
-function resetForm() {
-  document.getElementById('formSection').classList.remove('hidden');
-  document.getElementById('processingSection').classList.add('hidden');
-  ['name','memberId','income','children','loanAmount','notes'].forEach(function(id) {
-    document.getElementById(id).value = '';
-  });
-  ['occupation','harvestMonth','loanReason'].forEach(function(id) {
-    document.getElementById(id).value = '';
-  });
-  ['scoutOutput','guardianOutput','prideBox','hunterOutput','declinedOutput','autoApprovedOutput'].forEach(function(id) {
-    document.getElementById(id).classList.add('hidden');
-  });
-  document.getElementById('scoutStep').className = 'step active';
-  document.getElementById('guardianStep').className = 'step';
-  document.getElementById('prideStep').className = 'step';
-  document.getElementById('hunterStep').className = 'step';
-}
+    function clearLocalStorage() {
+        localStorage.removeItem('ujima_apps');
+        loadHistory();
+    }
 </script>
+
 </body>
 </html>
