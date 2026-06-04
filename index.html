@@ -81,16 +81,16 @@
       <div class="card">
         <h2>Member Loan Application</h2>
 
-        <div class="section-title">Member Details</div>
-        <label>Full Name</label>
+        <div class="section-title">Member Details/Maelezo ya mwanachama</div>
+        <label>Full Name/Jina kamili</label>
         <input type="text" id="name" placeholder="e.g. Grace Auma">
 
-        <label>Member ID</label>
+        <label>Member ID/kitambulisho cha mwanachama</label>
         <input type="text" id="memberId" placeholder="e.g. UJ001">
 
-        <label>Occupation</label>
+        <label>Occupation/kazi </label>
         <select id="occupation">
-          <option value="">Select occupation</option>
+          <option value="">Select occupation/chagua kazi yako</option>
           <option value="Maize farmer">Maize farmer</option>
           <option value="Market vendor">Market vendor</option>
           <option value="Shea butter trader">Shea butter trader</option>
@@ -100,10 +100,10 @@
           <option value="Other informal trader">Other informal trader</option>
         </select>
 
-        <label>Monthly Income (KES)</label>
+        <label>Monthly Income (KES)/Mshahara wako</label>
         <input type="number" id="income" placeholder="e.g. 8500">
 
-        <label>Harvest Month</label>
+        <label>Harvest Month /Majira ya mavuno</label>
         <select id="harvestMonth">
           <option value="">Select harvest month</option>
           <option value="January">January</option>
@@ -121,14 +121,14 @@
         </select>
 
         <div class="section-title">Household</div>
-        <label>Number of Children Under 5</label>
+        <label>Number of Children Under 5/Idadi ya watoto chini ya miaka 5 </label>
         <input type="number" id="children" placeholder="e.g. 2" min="0">
 
         <div class="section-title">Loan Request</div>
-        <label>Loan Amount Requested (KES)</label>
+        <label>Loan Amount Requested (KES)/kiasi cha mkopo</label>
         <input type="number" id="loanAmount" placeholder="e.g. 28000">
 
-        <label>Reason for Loan</label>
+        <label>Reason for Loan/sababu ya mkopo</label>
         <select id="loanReason">
           <option value="">Select reason</option>
           <option value="school fees">School fees</option>
@@ -140,7 +140,7 @@
           <option value="other">Other</option>
         </select>
 
-        <label>Additional Notes (optional)</label>
+        <label>Additional Notes (optional)/maelezo ya ziada</label>
         <textarea id="notes" placeholder="Any other information the loan officer should know"></textarea>
 
         <button class="btn" onclick="submitApplication()">Submit Application</button>
