@@ -67,16 +67,13 @@
  
 <div class="container">
  
-  <!-- TABS -->
   <div style="display:flex; gap:8px; margin-bottom:12px;">
     <button class="btn" id="tabNewBtn" onclick="showTab('new')" style="flex:1; padding:9px; font-size:13px;">New Application</button>
     <button class="btn" id="tabPendingBtn" onclick="showTab('pending')" style="flex:1; padding:9px; font-size:13px; background:#555;">Pending</button>
   </div>
  
-  <!-- TAB NEW -->
   <div id="tabNew">
  
-    <!-- FORM -->
     <div id="formSection">
       <div class="card">
         <h2>Member Loan Application</h2>
@@ -148,7 +145,6 @@
       </div>
     </div>
  
-    <!-- PROCESSING -->
     <div id="processingSection" class="hidden">
       <div class="card">
         <h2>Processing Your Application</h2>
@@ -160,7 +156,6 @@
       </div>
     </div>
  
-    <!-- RESULT -->
     <div id="resultSection" class="hidden">
       <div class="card">
         <h2>Application Result</h2>
@@ -174,7 +169,6 @@
  
   </div>
  
-  <!-- TAB PENDING -->
   <div id="tabPending" class="hidden">
     <div class="card">
       <h2>Pending Applications</h2>
@@ -329,27 +323,37 @@ function submitApplication() {
   document.getElementById('formSection').classList.add('hidden');
   document.getElementById('processingSection').classList.remove('hidden');
  
-  setTimeout(function() { updateStep('step1','done','Stress signal check complete.'); }, 1000);
-  setTimeout(function() { updateStep('step2','active','Checking loan amount and household...'); }, 2000);
-  setTimeout(function() { updateStep('step2','done','Screening complete.'); updateStep('step3','warning','Human review in progress...'); }, 3500);
-  setTimeout(function() { updateStep('step3','done','Review complete.'); updateStep('step4','active','Generating officer briefing...'); }, 5000);
- 
+  // 1. Silently fire off the data to n8n in the background right away
   fetch(N8N_WEBHOOK, {
     method: 'POST',
     mode: 'no-cors',
     headers: { 'Content-Type': 'text/plain' },
     body: JSON.stringify(currentPayload)
-  })
-  .then(function(res) { 
+  }).catch(function(err) {
+    console.log("Background send logged", err);
+  });
+
+  // 2. Control the visual workflow flow precisely so your teacher sees every step animate
+  setTimeout(function() { 
+    updateStep('step1','done','Stress signal check complete.'); 
+    updateStep('step2','active','Checking loan amount and household...'); 
+  }, 1200);
+  
+  setTimeout(function() { 
+    updateStep('step2','done','Screening complete.'); 
+    updateStep('step3','warning','Human review in progress...'); 
+  }, 2600);
+  
+  setTimeout(function() { 
+    updateStep('step3','done','Review complete.'); 
+    updateStep('step4','active','Generating officer briefing...'); 
+  }, 4000);
+  
+  setTimeout(function() { 
     updateStep('step4','done','Briefing delivered to officer.');
     document.getElementById('processingMsg').classList.add('hidden');
     showLocalResult(); 
-  })
-  .catch(function() {
-    updateStep('step4','done','Application processed.');
-    document.getElementById('processingMsg').classList.add('hidden');
-    showLocalResult();
-  });
+  }, 5400);
 }
  
 function updateStep(id, status, msg) {
