@@ -14,6 +14,8 @@
   .offline-bar.show { display: block; }
   .online-bar { display: none; background: #166534; color: white; text-align: center; padding: 8px; font-size: 13px; }
   .online-bar.show { display: block; }
+  .sync-bar { display: none; background: #1d4ed8; color: white; text-align: center; padding: 8px; font-size: 13px; }
+  .sync-bar.show { display: block; }
   .container { max-width: 600px; margin: 0 auto; padding: 12px; }
   .card { background: white; border: 1px solid #ddd; border-radius: 6px; padding: 14px; margin-bottom: 12px; }
   .card h2 { font-size: 15px; color: #1a6b3c; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 12px; }
@@ -50,17 +52,20 @@
   .note { font-size: 12px; color: #888; margin-top: 4px; }
   .section-title { font-size: 12px; font-weight: bold; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; margin-top: 4px; }
   .divider { border: none; border-top: 1px solid #eee; margin: 12px 0; }
-  .saved-list { font-size: 13px; }
   .saved-item { border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin-bottom: 8px; background: #fafafa; }
-  .saved-item p { margin-bottom: 4px; }
+  .saved-item p { margin-bottom: 4px; font-size: 13px; }
   .saved-item .meta { color: #888; font-size: 11px; }
+  .sync-status { font-size: 11px; margin-top: 4px; display: block; }
+  .sync-pending { color: #92400e; }
+  .sync-synced { color: #166534; }
+  .sync-failed { color: #991b1b; }
 </style>
 </head>
 <body>
 
-<!-- OFFLINE / ONLINE STATUS BARS -->
-<div class="offline-bar" id="offlineBar">You are offline. Your data is saved on this device and will sync when connected.</div>
-<div class="online-bar" id="onlineBar">You are back online.</div>
+<div class="offline-bar" id="offlineBar">You are offline. Applications are saved on this device and will sync automatically when reconnected.</div>
+<div class="online-bar" id="onlineBar">You are back online. Syncing pending applications...</div>
+<div class="sync-bar" id="syncBar">Syncing applications to server...</div>
 
 <header>
   <h1>Ujima SACCO</h1>
@@ -69,13 +74,11 @@
 
 <div class="container">
 
-  <!-- TABS -->
   <div style="display:flex; gap:8px; margin-bottom:12px;">
     <button class="btn" id="tabNewBtn" onclick="showTab('new')" style="flex:1; padding:9px; font-size:13px;">New Application</button>
     <button class="btn btn-secondary" id="tabSavedBtn" onclick="showTab('saved')" style="flex:1; padding:9px; font-size:13px;">Saved Applications</button>
   </div>
 
-  <!-- TAB: NEW APPLICATION FORM -->
   <div id="tabNew">
     <div id="formSection">
       <div class="card">
@@ -84,40 +87,28 @@
         <div class="section-title">Member Details</div>
         <label>Full Name</label>
         <input type="text" id="name" placeholder="e.g. Grace Auma">
-
         <label>Member ID</label>
         <input type="text" id="memberId" placeholder="e.g. UJ001">
-
         <label>Occupation</label>
         <select id="occupation">
           <option value="">Select occupation</option>
-          <option value="Maize farmer">Maize farmer</option>
-          <option value="Market vendor">Market vendor</option>
-          <option value="Shea butter trader">Shea butter trader</option>
-          <option value="Matooke farmer">Matooke farmer</option>
-          <option value="Charcoal seller">Charcoal seller</option>
-          <option value="Formal employee">Formal employee</option>
-          <option value="Other informal trader">Other informal trader</option>
+          <option>Maize farmer</option>
+          <option>Market vendor</option>
+          <option>Shea butter trader</option>
+          <option>Matooke farmer</option>
+          <option>Charcoal seller</option>
+          <option>Formal employee</option>
+          <option>Other informal trader</option>
         </select>
-
         <label>Monthly Income (KES)</label>
         <input type="number" id="income" placeholder="e.g. 8500">
-
         <label>Harvest Month</label>
         <select id="harvestMonth">
           <option value="">Select harvest month</option>
-          <option value="January">January</option>
-          <option value="February">February</option>
-          <option value="March">March</option>
-          <option value="April">April</option>
-          <option value="May">May</option>
-          <option value="June">June</option>
-          <option value="July">July</option>
-          <option value="August">August</option>
-          <option value="September">September</option>
-          <option value="October">October</option>
-          <option value="November">November</option>
-          <option value="December">December</option>
+          <option>January</option><option>February</option><option>March</option>
+          <option>April</option><option>May</option><option>June</option>
+          <option>July</option><option>August</option><option>September</option>
+          <option>October</option><option>November</option><option>December</option>
         </select>
 
         <div class="section-title">Household</div>
@@ -127,7 +118,6 @@
         <div class="section-title">Loan Request</div>
         <label>Loan Amount Requested (KES)</label>
         <input type="number" id="loanAmount" placeholder="e.g. 28000">
-
         <label>Reason for Loan</label>
         <select id="loanReason">
           <option value="">Select reason</option>
@@ -139,22 +129,19 @@
           <option value="loan shark">Refinance loan shark debt</option>
           <option value="other">Other</option>
         </select>
-
         <label>Additional Notes (optional)</label>
         <textarea id="notes" placeholder="Any other information the loan officer should know"></textarea>
 
         <button class="btn" onclick="submitApplication()">Submit Application</button>
-        <p class="note" style="margin-top:8px; text-align:center;">Your data is saved on this device even without internet.</p>
+        <p class="note" style="margin-top:8px; text-align:center;">Saved on this device even without internet. Syncs automatically when reconnected.</p>
       </div>
     </div>
 
-    <!-- PROCESSING SECTION -->
     <div id="processingSection" class="hidden">
-
       <div class="card">
         <h2>Application Processing</h2>
         <div class="step active" id="scoutStep">
-          <h3>Scout Agent <span class="badge badge-blue">Running</span></h3>
+          <h3>Scout Agent <span class="badge badge-blue" id="scoutBadge">Running</span></h3>
           <p id="scoutMsg">Checking for financial stress signals...</p>
         </div>
         <div class="step" id="guardianStep">
@@ -233,11 +220,10 @@
     </div>
   </div>
 
-  <!-- TAB: SAVED APPLICATIONS -->
   <div id="tabSaved" class="hidden">
     <div class="card">
       <h2>Saved Applications</h2>
-      <p class="note" style="margin-bottom:12px;">All applications are saved on this device. They are available even without internet.</p>
+      <p class="note" style="margin-bottom:12px;">Saved on this device. Pending applications sync to the server automatically when you reconnect.</p>
       <div id="savedList"></div>
       <button class="btn btn-secondary" style="margin-top:8px;" onclick="clearSaved()">Clear All Saved Data</button>
     </div>
@@ -246,45 +232,137 @@
 </div>
 
 <script>
+// ── CONFIG ─────────────────────────────────────────────────────────────────
+// Replace this with your real backend URL before deploying.
+var SYNC_ENDPOINT = 'https://your-backend.example.com/api/loan-applications';
+
+// ── STATE ──────────────────────────────────────────────────────────────────
 var appData = {};
 
-// OFFLINE DETECTION
-window.addEventListener('offline', function() {
+// ── OFFLINE / ONLINE ───────────────────────────────────────────────────────
+window.addEventListener('offline', function () {
   document.getElementById('offlineBar').classList.add('show');
   document.getElementById('onlineBar').classList.remove('show');
 });
-window.addEventListener('online', function() {
+
+window.addEventListener('online', function () {
   document.getElementById('offlineBar').classList.remove('show');
   document.getElementById('onlineBar').classList.add('show');
-  setTimeout(function() {
-    document.getElementById('onlineBar').classList.remove('show');
-  }, 3000);
+  // Real sync triggered here
+  syncPending(function () {
+    setTimeout(function () {
+      document.getElementById('onlineBar').classList.remove('show');
+    }, 3000);
+  });
 });
+
 if (!navigator.onLine) {
   document.getElementById('offlineBar').classList.add('show');
 }
 
-// SERVICE WORKER REGISTRATION
+// ── SERVICE WORKER (page caching for offline use) ──────────────────────────
 if ('serviceWorker' in navigator) {
-  var swCode = `
-    var CACHE = 'ujima-v1';
-    self.addEventListener('install', function(e) {
-      e.waitUntil(caches.open(CACHE).then(function(c) {
-        return c.addAll(['/']);
-      }));
-    });
-    self.addEventListener('fetch', function(e) {
-      e.respondWith(caches.match(e.request).then(function(r) {
-        return r || fetch(e.request).catch(function() { return caches.match('/'); });
-      }));
-    });
-  `;
-  var blob = new Blob([swCode], {type: 'application/javascript'});
-  var swUrl = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl).catch(function() {});
+  var sw = [
+    "var CACHE='ujima-v1';",
+    "self.addEventListener('install',function(e){e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(['/']);}));});",
+    "self.addEventListener('fetch',function(e){e.respondWith(caches.match(e.request).then(function(r){return r||fetch(e.request).catch(function(){return caches.match('/');})}));});"
+  ].join('');
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw], {type:'application/javascript'}))).catch(function(){});
 }
 
-// TAB SWITCHING
+// ── STORAGE HELPERS ────────────────────────────────────────────────────────
+function loadApps() {
+  try { return JSON.parse(localStorage.getItem('ujima_apps') || '[]'); } catch(e) { return []; }
+}
+function storeApps(apps) {
+  localStorage.setItem('ujima_apps', JSON.stringify(apps));
+}
+
+// Save one record. synced=false means it has NOT reached the server yet.
+function saveApplication(data, status) {
+  var apps = loadApps();
+  var record = {};
+  // Copy all fields from data
+  for (var k in data) { if (data.hasOwnProperty(k)) record[k] = data[k]; }
+  record.status   = status;
+  record.savedAt  = new Date().toLocaleString();
+  record.id       = Date.now();
+  record.synced   = false;   // <-- key new field
+  record.syncedAt = null;
+  apps.push(record);
+  storeApps(apps);
+  // If online, try to send immediately
+  if (navigator.onLine) { syncPending(null); }
+  return record;
+}
+
+// ── SYNC LOGIC ─────────────────────────────────────────────────────────────
+// Iterates all unsynced records and POSTs them one at a time.
+// On success  → marks synced:true  + syncedAt timestamp
+// On failure  → marks synced:'failed' (retried next time online)
+function syncPending(callback) {
+  var apps    = loadApps();
+  var pending = apps.filter(function(a){ return a.synced === false; });
+
+  if (pending.length === 0) {
+    if (callback) callback();
+    return;
+  }
+
+  document.getElementById('syncBar').classList.add('show');
+  var i = 0;
+
+  function next() {
+    if (i >= pending.length) {
+      document.getElementById('syncBar').classList.remove('show');
+      // Refresh saved tab if visible
+      if (!document.getElementById('tabSaved').classList.contains('hidden')) {
+        loadSavedApplications();
+      }
+      if (callback) callback();
+      return;
+    }
+
+    var rec = pending[i];
+    i++;
+
+    fetch(SYNC_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(rec)
+    })
+    .then(function(res) {
+      markSynced(rec.id, res.ok ? true : 'failed', res.ok ? new Date().toLocaleString() : null);
+      next();
+    })
+    .catch(function() {
+      // Network error — will retry next reconnect
+      markSynced(rec.id, 'failed', null);
+      next();
+    });
+  }
+
+  next();
+}
+
+function markSynced(id, syncedValue, syncedAt) {
+  var apps = loadApps();
+  for (var j = 0; j < apps.length; j++) {
+    if (apps[j].id === id) {
+      apps[j].synced   = syncedValue;
+      apps[j].syncedAt = syncedAt;
+      break;
+    }
+  }
+  storeApps(apps);
+}
+
+// On page load, sync any records left over from a previous session
+window.addEventListener('load', function() {
+  if (navigator.onLine) { syncPending(null); }
+});
+
+// ── TABS ───────────────────────────────────────────────────────────────────
 function showTab(tab) {
   if (tab === 'new') {
     document.getElementById('tabNew').classList.remove('hidden');
@@ -300,33 +378,35 @@ function showTab(tab) {
   }
 }
 
-// SAVE TO LOCALSTORAGE
-function saveApplication(data, status) {
-  var saved = JSON.parse(localStorage.getItem('ujima_apps') || '[]');
-  data.status = status;
-  data.savedAt = new Date().toLocaleString();
-  data.id = Date.now();
-  saved.push(data);
-  localStorage.setItem('ujima_apps', JSON.stringify(saved));
-}
-
-// LOAD SAVED APPLICATIONS
+// ── SAVED APPLICATIONS TAB ─────────────────────────────────────────────────
 function loadSavedApplications() {
-  var saved = JSON.parse(localStorage.getItem('ujima_apps') || '[]');
-  var list = document.getElementById('savedList');
+  var saved = loadApps();
+  var list  = document.getElementById('savedList');
   if (saved.length === 0) {
-    list.innerHTML = '<p style="font-size:13px; color:#888;">No saved applications yet.</p>';
+    list.innerHTML = '<p style="font-size:13px;color:#888;">No saved applications yet.</p>';
     return;
   }
   var html = '';
   saved.slice().reverse().forEach(function(app) {
-    var badgeColor = app.status === 'Auto Approved' ? 'badge-green' : app.status === 'Declined' ? 'badge-red' : 'badge-yellow';
-    html += '<div class="saved-item">' +
-      '<p><strong>' + app.name + '</strong> (' + app.memberId + ')</p>' +
-      '<p>' + app.occupation + ' — KES ' + parseInt(app.loanAmount).toLocaleString() + ' — ' + app.loanReason + '</p>' +
-      '<p><span class="badge ' + badgeColor + '">' + app.status + '</span></p>' +
-      '<p class="meta">Saved: ' + app.savedAt + '</p>' +
-      '</div>';
+    var bc = app.status === 'Auto Approved' ? 'badge-green'
+           : app.status === 'Declined'      ? 'badge-red' : 'badge-yellow';
+
+    var syncLabel;
+    if (app.synced === true) {
+      syncLabel = '<span class="sync-status sync-synced">✓ Synced to server — ' + (app.syncedAt || '') + '</span>';
+    } else if (app.synced === 'failed') {
+      syncLabel = '<span class="sync-status sync-failed">⚠ Sync failed — will retry when reconnected</span>';
+    } else {
+      syncLabel = '<span class="sync-status sync-pending">⏳ Pending sync — saved on device only</span>';
+    }
+
+    html += '<div class="saved-item">'
+      + '<p><strong>' + app.name + '</strong> (' + app.memberId + ')</p>'
+      + '<p>' + app.occupation + ' — KES ' + parseInt(app.loanAmount).toLocaleString() + ' — ' + app.loanReason + '</p>'
+      + '<p><span class="badge ' + bc + '">' + app.status + '</span></p>'
+      + '<p>' + syncLabel + '</p>'
+      + '<p class="meta">Saved: ' + app.savedAt + '</p>'
+      + '</div>';
   });
   list.innerHTML = html;
 }
@@ -338,14 +418,14 @@ function clearSaved() {
   }
 }
 
-// SUBMIT APPLICATION
+// ── FORM SUBMIT ────────────────────────────────────────────────────────────
 function submitApplication() {
-  var name = document.getElementById('name').value.trim();
-  var memberId = document.getElementById('memberId').value.trim();
+  var name       = document.getElementById('name').value.trim();
+  var memberId   = document.getElementById('memberId').value.trim();
   var occupation = document.getElementById('occupation').value;
-  var income = parseInt(document.getElementById('income').value) || 0;
-  var harvestMonth = document.getElementById('harvestMonth').value;
-  var children = parseInt(document.getElementById('children').value) || 0;
+  var income     = parseInt(document.getElementById('income').value) || 0;
+  var harvest    = document.getElementById('harvestMonth').value;
+  var children   = parseInt(document.getElementById('children').value) || 0;
   var loanAmount = parseInt(document.getElementById('loanAmount').value) || 0;
   var loanReason = document.getElementById('loanReason').value;
 
@@ -354,174 +434,174 @@ function submitApplication() {
     return;
   }
 
-  appData = { name: name, memberId: memberId, occupation: occupation, income: income, harvestMonth: harvestMonth, children: children, loanAmount: loanAmount, loanReason: loanReason };
+  appData = { name:name, memberId:memberId, occupation:occupation, income:income,
+              harvestMonth:harvest, children:children, loanAmount:loanAmount, loanReason:loanReason };
 
   document.getElementById('formSection').classList.add('hidden');
   document.getElementById('processingSection').classList.remove('hidden');
-
-  setTimeout(function() { runScoutAgent(); }, 800);
+  setTimeout(runScoutAgent, 800);
 }
 
+// ── SCOUT AGENT ────────────────────────────────────────────────────────────
 function runScoutAgent() {
-  var stressKeywords = ['school fees', 'no money', 'loan shark', 'medical emergency'];
-  var hasStress = stressKeywords.indexOf(appData.loanReason) !== -1;
+  var stressKw  = ['school fees','no money','loan shark','medical emergency'];
+  var hasStress = stressKw.indexOf(appData.loanReason) !== -1;
 
-  document.getElementById('scoutStep').className = 'step done';
-  document.getElementById('scoutStep').querySelector('span').className = 'badge badge-green';
-  document.getElementById('scoutStep').querySelector('span').textContent = 'Done';
+  var stepEl = document.getElementById('scoutStep');
+  stepEl.className = 'step done';
+  stepEl.querySelector('span').className   = 'badge badge-green';
+  stepEl.querySelector('span').textContent = 'Done';
   document.getElementById('scoutMsg').textContent = hasStress
     ? 'Stress signal detected — ' + appData.loanReason + '. Passing to Guardian Agent.'
     : 'No stress signal. Passing to Guardian Agent for screening.';
 
   document.getElementById('scoutOutput').classList.remove('hidden');
-  document.getElementById('out-name').textContent = appData.name + ' (' + appData.memberId + ')';
-  document.getElementById('out-stress').innerHTML = hasStress
+  document.getElementById('out-name').textContent    = appData.name + ' (' + appData.memberId + ')';
+  document.getElementById('out-stress').innerHTML    = hasStress
     ? '<span class="badge badge-yellow">YES — ' + appData.loanReason + '</span>'
     : '<span class="badge badge-green">None detected</span>';
   document.getElementById('out-harvest').textContent = appData.harvestMonth || 'Not specified';
-  document.getElementById('out-handoff').innerHTML = '<span class="badge badge-green">YES — to Guardian</span>';
+  document.getElementById('out-handoff').innerHTML   = '<span class="badge badge-green">YES — to Guardian</span>';
 
-  setTimeout(function() { runGuardianAgent(); }, 1000);
+  setTimeout(runGuardianAgent, 1000);
 }
 
+// ── GUARDIAN AGENT ─────────────────────────────────────────────────────────
 function runGuardianAgent() {
-  document.getElementById('guardianStep').className = 'step active';
-  document.getElementById('guardianBadge').textContent = 'Running';
+  document.getElementById('guardianStep').className          = 'step active';
+  document.getElementById('guardianBadge').textContent       = 'Running';
 
   setTimeout(function() {
-    var flags = 0;
-    var flagDetails = [];
-    if (appData.loanAmount > 15000) { flags++; flagDetails.push('Loan above KES 15,000'); }
-    if (appData.children >= 2) { flags++; flagDetails.push('2+ children under 5'); }
-    if (appData.loanReason === 'loan shark') { flags++; flagDetails.push('Debt collector mentioned'); }
+    var flags = 0, fd = [];
+    if (appData.loanAmount > 15000)          { flags++; fd.push('Loan above KES 15,000'); }
+    if (appData.children >= 2)               { flags++; fd.push('2+ children under 5'); }
+    if (appData.loanReason === 'loan shark') { flags++; fd.push('Debt collector mentioned'); }
 
-    var score = Math.min(95, 60 + (appData.income / 1000) * 2 + (appData.loanAmount < 15000 ? 10 : 0));
-    score = Math.round(score);
-    var escalate = appData.loanAmount > 15000 || appData.children >= 2 || appData.loanReason === 'loan shark';
-    var autoApprove = appData.loanAmount <= 15000 && flags === 0;
+    var score      = Math.round(Math.min(95, 60 + (appData.income/1000)*2 + (appData.loanAmount < 15000 ? 10 : 0)));
+    var escalate   = appData.loanAmount > 15000 || appData.children >= 2 || appData.loanReason === 'loan shark';
+    var autoApprove= appData.loanAmount <= 15000 && flags === 0;
 
-    appData.flags = flags;
-    appData.flagDetails = flagDetails;
-    appData.score = score;
-    appData.escalate = escalate;
-    appData.autoApprove = autoApprove;
+    appData.flags = flags; appData.flagDetails = fd;
+    appData.score = score; appData.escalate = escalate; appData.autoApprove = autoApprove;
 
-    document.getElementById('guardianStep').className = 'step done';
-    document.getElementById('guardianBadge').className = 'badge badge-green';
-    document.getElementById('guardianBadge').textContent = 'Done';
+    document.getElementById('guardianStep').className          = 'step done';
+    document.getElementById('guardianBadge').className         = 'badge badge-green';
+    document.getElementById('guardianBadge').textContent       = 'Done';
     document.getElementById('guardianMsg').textContent = escalate
       ? 'Escalating to Hunter Agent — PRIDE Loop activated.'
       : 'Auto-approved. Amount within KES 15,000 threshold.';
 
     document.getElementById('guardianOutput').classList.remove('hidden');
-    document.getElementById('out-loan').textContent = 'KES ' + appData.loanAmount.toLocaleString();
+    document.getElementById('out-loan').textContent     = 'KES ' + appData.loanAmount.toLocaleString();
     document.getElementById('out-children').textContent = appData.children;
-    document.getElementById('out-flags').innerHTML = flags > 0
-      ? '<span class="badge badge-yellow">' + flags + ' flag(s): ' + flagDetails.join(', ') + '</span>'
+    document.getElementById('out-flags').innerHTML      = flags > 0
+      ? '<span class="badge badge-yellow">' + flags + ' flag(s): ' + fd.join(', ') + '</span>'
       : '<span class="badge badge-green">None</span>';
-    document.getElementById('out-score').textContent = score + '%';
-    document.getElementById('out-escalate').innerHTML = escalate
+    document.getElementById('out-score').textContent    = score + '%';
+    document.getElementById('out-escalate').innerHTML   = escalate
       ? '<span class="badge badge-yellow">YES — to Hunter</span>'
       : '<span class="badge badge-green">NO — Auto Approved</span>';
 
-    setTimeout(function() {
-      if (autoApprove) { showAutoApproved(); } else { showPRIDELoop(); }
-    }, 800);
+    setTimeout(function() { autoApprove ? showAutoApproved() : showPRIDELoop(); }, 800);
   }, 1000);
 }
 
+// ── PRIDE LOOP ─────────────────────────────────────────────────────────────
 function showPRIDELoop() {
-  document.getElementById('prideStep').className = 'step warning';
+  document.getElementById('prideStep').className    = 'step warning';
   document.getElementById('prideBadge').textContent = 'Action Required';
-  document.getElementById('prideMsg').textContent = 'Waiting for human officer approval.';
-  var reasons = [];
-  if (appData.loanAmount > 15000) reasons.push('Loan amount KES ' + appData.loanAmount.toLocaleString() + ' exceeds KES 15,000 threshold');
-  if (appData.children >= 2) reasons.push('Applicant has ' + appData.children + ' children under 5');
-  if (appData.loanReason === 'loan shark') reasons.push('Applicant mentions debt collector');
-  document.getElementById('prideReason').textContent = 'Pause reason: ' + reasons.join('. ') + '. Human review required before proceeding.';
+  document.getElementById('prideMsg').textContent   = 'Waiting for human officer approval.';
+  var r = [];
+  if (appData.loanAmount > 15000)          r.push('Loan KES ' + appData.loanAmount.toLocaleString() + ' exceeds KES 15,000');
+  if (appData.children >= 2)               r.push('Applicant has ' + appData.children + ' children under 5');
+  if (appData.loanReason === 'loan shark') r.push('Applicant mentions debt collector');
+  document.getElementById('prideReason').textContent = 'Pause reason: ' + r.join('. ') + '. Human review required.';
   document.getElementById('prideBox').classList.remove('hidden');
 }
 
 function prideApprove() {
   document.getElementById('prideBox').classList.add('hidden');
-  document.getElementById('prideStep').className = 'step done';
-  document.getElementById('prideBadge').className = 'badge badge-green';
+  document.getElementById('prideStep').className    = 'step done';
+  document.getElementById('prideBadge').className   = 'badge badge-green';
   document.getElementById('prideBadge').textContent = 'Approved';
-  document.getElementById('prideMsg').textContent = 'Human officer approved. Passing to Hunter Agent.';
-  setTimeout(function() { runHunterAgent(); }, 600);
+  document.getElementById('prideMsg').textContent   = 'Human officer approved. Passing to Hunter Agent.';
+  setTimeout(runHunterAgent, 600);
 }
 
 function prideDecline() {
   document.getElementById('prideBox').classList.add('hidden');
-  document.getElementById('prideStep').className = 'step danger';
-  document.getElementById('prideBadge').className = 'badge badge-red';
+  document.getElementById('prideStep').className    = 'step danger';
+  document.getElementById('prideBadge').className   = 'badge badge-red';
   document.getElementById('prideBadge').textContent = 'Declined';
-  document.getElementById('prideMsg').textContent = 'Application returned for manual review.';
+  document.getElementById('prideMsg').textContent   = 'Application returned for manual review.';
   document.getElementById('declinedOutput').classList.remove('hidden');
   saveApplication(appData, 'Declined');
 }
 
+// ── HUNTER AGENT ───────────────────────────────────────────────────────────
 function runHunterAgent() {
-  document.getElementById('hunterStep').className = 'step active';
+  document.getElementById('hunterStep').className    = 'step active';
   document.getElementById('hunterBadge').textContent = 'Running';
+
   setTimeout(function() {
-    document.getElementById('hunterStep').className = 'step done';
-    document.getElementById('hunterBadge').className = 'badge badge-green';
+    document.getElementById('hunterStep').className    = 'step done';
+    document.getElementById('hunterBadge').className   = 'badge badge-green';
     document.getElementById('hunterBadge').textContent = 'Done';
-    document.getElementById('hunterMsg').textContent = 'Briefing packet generated. Officer notified within 15 minutes.';
-    var officer = (appData.occupation === 'Maize farmer' || appData.occupation === 'Matooke farmer')
-      ? 'Officer Sarah Mwangi' : 'Officer James Odhiambo';
-    var expertise = (appData.occupation === 'Maize farmer' || appData.occupation === 'Matooke farmer')
-      ? 'Smallholder farmers — western Kenya' : 'Informal traders — market vendors';
+    document.getElementById('hunterMsg').textContent   = 'Briefing packet generated. Officer notified within 15 minutes.';
+
+    var farmer  = appData.occupation === 'Maize farmer' || appData.occupation === 'Matooke farmer';
+    var officer = farmer ? 'Officer Sarah Mwangi'      : 'Officer James Odhiambo';
+    var expert  = farmer ? 'Smallholder farmers — western Kenya' : 'Informal traders — market vendors';
+
     document.getElementById('hunterOutput').classList.remove('hidden');
-    document.getElementById('out-officer').textContent = officer;
-    document.getElementById('out-expertise').textContent = expertise;
-    document.getElementById('out-priority').innerHTML = '<span class="badge badge-yellow">HIGH</span>';
-    document.getElementById('out-briefing').textContent =
-      'Applicant: ' + appData.name + ', ' + appData.occupation + '. ' +
-      'Monthly income: KES ' + appData.income.toLocaleString() + '. ' +
-      'Harvest month: ' + (appData.harvestMonth || 'not specified') + '. ' +
-      'Children under 5: ' + appData.children + '. ' +
-      'Loan request: KES ' + appData.loanAmount.toLocaleString() + ' for ' + appData.loanReason + '. ' +
-      'Risk flags: ' + (appData.flagDetails.length > 0 ? appData.flagDetails.join(', ') : 'None') + '. ' +
-      'Score: ' + appData.score + '%. ' +
-      'Repayment aligned to ' + (appData.harvestMonth || 'harvest season') + '. ' +
-      'Human officer makes final loan decision.';
+    document.getElementById('out-officer').textContent    = officer;
+    document.getElementById('out-expertise').textContent  = expert;
+    document.getElementById('out-priority').innerHTML     = '<span class="badge badge-yellow">HIGH</span>';
+    document.getElementById('out-briefing').textContent   =
+      'Applicant: ' + appData.name + ', ' + appData.occupation + '. '
+      + 'Monthly income: KES ' + appData.income.toLocaleString() + '. '
+      + 'Harvest month: ' + (appData.harvestMonth || 'not specified') + '. '
+      + 'Children under 5: ' + appData.children + '. '
+      + 'Loan request: KES ' + appData.loanAmount.toLocaleString() + ' for ' + appData.loanReason + '. '
+      + 'Risk flags: ' + (appData.flagDetails.length ? appData.flagDetails.join(', ') : 'None') + '. '
+      + 'Score: ' + appData.score + '%. '
+      + 'Repayment aligned to ' + (appData.harvestMonth || 'harvest season') + '. '
+      + 'Human officer makes final loan decision.';
+
     saveApplication(appData, 'Sent to Hunter');
   }, 1000);
 }
 
+// ── AUTO APPROVED ──────────────────────────────────────────────────────────
 function showAutoApproved() {
-  document.getElementById('prideStep').className = 'step done';
-  document.getElementById('prideBadge').className = 'badge badge-green';
+  document.getElementById('prideStep').className    = 'step done';
+  document.getElementById('prideBadge').className   = 'badge badge-green';
   document.getElementById('prideBadge').textContent = 'Not Required';
-  document.getElementById('hunterStep').className = 'step done';
-  document.getElementById('hunterBadge').className = 'badge badge-green';
-  document.getElementById('hunterBadge').textContent = 'Not Required';
+  document.getElementById('hunterStep').className   = 'step done';
+  document.getElementById('hunterBadge').className  = 'badge badge-green';
+  document.getElementById('hunterBadge').textContent= 'Not Required';
+
   document.getElementById('autoApprovedOutput').classList.remove('hidden');
   document.getElementById('out-auto-loan').textContent = 'KES ' + appData.loanAmount.toLocaleString();
   document.getElementById('out-repayment').textContent = appData.harvestMonth
-    ? 'Aligned to ' + appData.harvestMonth + ' harvest cycle'
-    : 'Standard monthly schedule';
+    ? 'Aligned to ' + appData.harvestMonth + ' harvest cycle' : 'Standard monthly schedule';
+
   saveApplication(appData, 'Auto Approved');
 }
 
+// ── RESET ──────────────────────────────────────────────────────────────────
 function resetForm() {
   document.getElementById('formSection').classList.remove('hidden');
   document.getElementById('processingSection').classList.add('hidden');
-  ['name','memberId','income','children','loanAmount','notes'].forEach(function(id) {
-    document.getElementById(id).value = '';
-  });
-  ['occupation','harvestMonth','loanReason'].forEach(function(id) {
-    document.getElementById(id).value = '';
-  });
-  ['scoutOutput','guardianOutput','prideBox','hunterOutput','declinedOutput','autoApprovedOutput'].forEach(function(id) {
+  ['name','memberId','income','children','loanAmount','notes'].forEach(function(id){ document.getElementById(id).value=''; });
+  ['occupation','harvestMonth','loanReason'].forEach(function(id){ document.getElementById(id).value=''; });
+  ['scoutOutput','guardianOutput','prideBox','hunterOutput','declinedOutput','autoApprovedOutput'].forEach(function(id){
     document.getElementById(id).classList.add('hidden');
   });
-  document.getElementById('scoutStep').className = 'step active';
+  document.getElementById('scoutStep').className    = 'step active';
   document.getElementById('guardianStep').className = 'step';
-  document.getElementById('prideStep').className = 'step';
-  document.getElementById('hunterStep').className = 'step';
+  document.getElementById('prideStep').className    = 'step';
+  document.getElementById('hunterStep').className   = 'step';
 }
 </script>
 </body>
