@@ -3,18 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ujima SACCO - Loan Application</title>
+<title>Ujima SACCO - Loan Application System</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: Arial, sans-serif; font-size: 15px; background: #f5f5f5; color: #222; }
   header { background: #1a6b3c; color: white; padding: 14px 16px; }
   header h1 { font-size: 18px; }
   header p { font-size: 12px; margin-top: 2px; opacity: 0.85; }
-  .status-bar { display: none; color: white; text-align: center; padding: 8px; font-size: 13px; }
-  .status-bar.show { display: block; }
-  .offline-bar { background: #b91c1c; }
-  .online-bar { background: #166534; }
-  .saved-bar { background: #d97706; }
+  .offline-bar { display: none; background: #b91c1c; color: white; text-align: center; padding: 8px; font-size: 13px; }
+  .offline-bar.show { display: block; }
+  .online-bar { display: none; background: #166534; color: white; text-align: center; padding: 8px; font-size: 13px; }
+  .online-bar.show { display: block; }
   .container { max-width: 600px; margin: 0 auto; padding: 12px; }
   .card { background: white; border: 1px solid #ddd; border-radius: 6px; padding: 14px; margin-bottom: 12px; }
   .card h2 { font-size: 15px; color: #1a6b3c; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 12px; }
@@ -23,68 +22,72 @@
   textarea { height: 70px; resize: none; }
   .btn { display: block; width: 100%; padding: 11px; background: #1a6b3c; color: white; border: none; border-radius: 4px; font-size: 15px; font-weight: bold; cursor: pointer; }
   .btn:active { background: #145530; }
+  .btn-approve { background: #1a6b3c; }
+  .btn-decline { background: #b91c1c; margin-top: 8px; }
   .btn-secondary { background: #555; margin-top: 8px; }
   .hidden { display: none; }
-  .section-title { font-size: 12px; font-weight: bold; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; margin-top: 4px; }
-  .note { font-size: 12px; color: #888; margin-top: 4px; }
-  .divider { border: none; border-top: 1px solid #eee; margin: 12px 0; }
+  .step { border-left: 4px solid #ccc; padding: 10px 12px; margin-bottom: 10px; background: #fafafa; border-radius: 0 4px 4px 0; }
+  .step.active { border-left-color: #1a6b3c; background: #f0faf4; }
+  .step.warning { border-left-color: #d97706; background: #fffbeb; }
+  .step.danger { border-left-color: #b91c1c; background: #fef2f2; }
+  .step.done { border-left-color: #1a6b3c; background: #f0faf4; }
+  .step h3 { font-size: 13px; font-weight: bold; margin-bottom: 4px; }
+  .step p { font-size: 13px; color: #555; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
+  .badge-green { background: #dcfce7; color: #166534; }
+  .badge-yellow { background: #fef9c3; color: #854d0e; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
   .result-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #eee; font-size: 13px; }
   .result-row:last-child { border-bottom: none; }
   .result-label { color: #666; }
-  .result-value { font-weight: bold; color: #222; text-align: right; max-width: 65%; }
-  .step { border-left: 4px solid #ccc; padding: 10px 12px; margin-bottom: 10px; background: #fafafa; border-radius: 0 4px 4px 0; }
-  .step.active { border-left-color: #1a6b3c; background: #f0faf4; }
-  .step.done { border-left-color: #1a6b3c; background: #f0faf4; }
-  .step.warning { border-left-color: #d97706; background: #fffbeb; }
-  .step.danger { border-left-color: #b91c1c; background: #fef2f2; }
-  .step h3 { font-size: 13px; font-weight: bold; margin-bottom: 4px; }
-  .step p { font-size: 13px; color: #555; }
-  .result-eligible { background: #f0fdf4; border: 2px solid #16a34a; border-radius: 6px; padding: 16px; text-align: center; margin-bottom: 12px; }
-  .result-eligible h2 { color: #166534; font-size: 18px; margin-bottom: 8px; }
-  .result-declined { background: #fef2f2; border: 2px solid #b91c1c; border-radius: 6px; padding: 16px; text-align: center; margin-bottom: 12px; }
-  .result-declined h2 { color: #991b1b; font-size: 18px; margin-bottom: 8px; }
-  .result-pending { background: #fffbeb; border: 2px solid #d97706; border-radius: 6px; padding: 16px; text-align: center; margin-bottom: 12px; }
-  .result-pending h2 { color: #92400e; font-size: 18px; margin-bottom: 8px; }
-  .result-saved { background: #eff6ff; border: 2px solid #3b82f6; border-radius: 6px; padding: 16px; text-align: center; margin-bottom: 12px; }
-  .result-saved h2 { color: #1e40af; font-size: 18px; margin-bottom: 8px; }
-  .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #ccc; border-top-color: #1a6b3c; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .processing-msg { text-align: center; padding: 20px; font-size: 14px; color: #555; }
-  .pending-item { border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin-bottom: 8px; background: #fafafa; font-size: 13px; }
-  .pending-item p { margin-bottom: 3px; }
+  .result-value { font-weight: bold; color: #222; text-align: right; max-width: 60%; }
+  .pride-box { background: #fffbeb; border: 1px solid #d97706; border-radius: 6px; padding: 14px; margin-bottom: 12px; }
+  .pride-box h3 { color: #92400e; font-size: 14px; margin-bottom: 8px; }
+  .pride-box p { font-size: 13px; color: #78350f; margin-bottom: 10px; }
+  .briefing-box { background: #f0fdf4; border: 1px solid #16a34a; border-radius: 6px; padding: 14px; }
+  .briefing-box h3 { color: #166534; font-size: 14px; margin-bottom: 10px; }
+  .note { font-size: 12px; color: #888; margin-top: 4px; }
+  .section-title { font-size: 12px; font-weight: bold; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; margin-top: 4px; }
+  .divider { border: none; border-top: 1px solid #eee; margin: 12px 0; }
+  .saved-list { font-size: 13px; }
+  .saved-item { border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin-bottom: 8px; background: #fafafa; }
+  .saved-item p { margin-bottom: 4px; }
+  .saved-item .meta { color: #888; font-size: 11px; }
 </style>
 </head>
 <body>
- 
-<div class="status-bar offline-bar" id="offlineBar">You are offline. Your application will be saved and submitted when you reconnect.</div>
-<div class="status-bar online-bar" id="onlineBar">You are back online. Submitting saved applications...</div>
-<div class="status-bar saved-bar" id="savedBar">Application saved on your device. It will be submitted when internet is available.</div>
- 
+
+<!-- OFFLINE / ONLINE STATUS BARS -->
+<div class="offline-bar" id="offlineBar">You are offline. Your data is saved on this device and will sync when connected.</div>
+<div class="online-bar" id="onlineBar">You are back online.</div>
+
 <header>
   <h1>Ujima SACCO</h1>
-  <p>Loan Application System — Powered by AI Agents</p>
+  <p>Loan Application System — Scout · Guardian · Hunter</p>
 </header>
- 
+
 <div class="container">
- 
+
+  <!-- TABS -->
   <div style="display:flex; gap:8px; margin-bottom:12px;">
     <button class="btn" id="tabNewBtn" onclick="showTab('new')" style="flex:1; padding:9px; font-size:13px;">New Application</button>
-    <button class="btn" id="tabPendingBtn" onclick="showTab('pending')" style="flex:1; padding:9px; font-size:13px; background:#555;">Pending</button>
+    <button class="btn btn-secondary" id="tabSavedBtn" onclick="showTab('saved')" style="flex:1; padding:9px; font-size:13px;">Saved Applications</button>
   </div>
- 
+
+  <!-- TAB: NEW APPLICATION FORM -->
   <div id="tabNew">
- 
     <div id="formSection">
       <div class="card">
         <h2>Member Loan Application</h2>
- 
+
         <div class="section-title">Member Details</div>
         <label>Full Name</label>
         <input type="text" id="name" placeholder="e.g. Grace Auma">
- 
+
         <label>Member ID</label>
         <input type="text" id="memberId" placeholder="e.g. UJ001">
- 
+
         <label>Occupation</label>
         <select id="occupation">
           <option value="">Select occupation</option>
@@ -96,10 +99,10 @@
           <option value="Formal employee">Formal employee</option>
           <option value="Other informal trader">Other informal trader</option>
         </select>
- 
+
         <label>Monthly Income (KES)</label>
         <input type="number" id="income" placeholder="e.g. 8500">
- 
+
         <label>Harvest Month</label>
         <select id="harvestMonth">
           <option value="">Select harvest month</option>
@@ -116,15 +119,15 @@
           <option value="November">November</option>
           <option value="December">December</option>
         </select>
- 
+
         <div class="section-title">Household</div>
         <label>Number of Children Under 5</label>
         <input type="number" id="children" placeholder="e.g. 2" min="0">
- 
+
         <div class="section-title">Loan Request</div>
         <label>Loan Amount Requested (KES)</label>
         <input type="number" id="loanAmount" placeholder="e.g. 28000">
- 
+
         <label>Reason for Loan</label>
         <select id="loanReason">
           <option value="">Select reason</option>
@@ -136,245 +139,389 @@
           <option value="loan shark">Refinance loan shark debt</option>
           <option value="other">Other</option>
         </select>
- 
+
         <label>Additional Notes (optional)</label>
         <textarea id="notes" placeholder="Any other information the loan officer should know"></textarea>
- 
+
         <button class="btn" onclick="submitApplication()">Submit Application</button>
-        <p class="note" style="margin-top:8px; text-align:center;">Works offline — your application is saved if internet drops.</p>
+        <p class="note" style="margin-top:8px; text-align:center;">Your data is saved on this device even without internet.</p>
       </div>
     </div>
- 
+
+    <!-- PROCESSING SECTION -->
     <div id="processingSection" class="hidden">
+
       <div class="card">
-        <h2>Processing Your Application</h2>
-        <div class="step active" id="step1"><h3>Scout Agent</h3><p id="step1msg">Checking stress signals...</p></div>
-        <div class="step" id="step2"><h3>Guardian Agent</h3><p id="step2msg">Waiting...</p></div>
-        <div class="step" id="step3"><h3>PRIDE Loop — Human Review</h3><p id="step3msg">Waiting...</p></div>
-        <div class="step" id="step4"><h3>Hunter Agent</h3><p id="step4msg">Waiting...</p></div>
-        <div class="processing-msg" id="processingMsg"><span class="spinner"></span> Running automated risk assessment...</div>
+        <h2>Application Processing</h2>
+        <div class="step active" id="scoutStep">
+          <h3>Scout Agent <span class="badge badge-blue">Running</span></h3>
+          <p id="scoutMsg">Checking for financial stress signals...</p>
+        </div>
+        <div class="step" id="guardianStep">
+          <h3>Guardian Agent <span class="badge badge-blue" id="guardianBadge">Waiting</span></h3>
+          <p id="guardianMsg">Waiting for Scout Agent handoff...</p>
+        </div>
+        <div class="step" id="prideStep">
+          <h3>PRIDE Loop <span class="badge badge-yellow" id="prideBadge">Standby</span></h3>
+          <p id="prideMsg">Mandatory human review checkpoint.</p>
+        </div>
+        <div class="step" id="hunterStep">
+          <h3>Hunter Agent <span class="badge badge-blue" id="hunterBadge">Waiting</span></h3>
+          <p id="hunterMsg">Waiting for Guardian Agent handoff...</p>
+        </div>
       </div>
-    </div>
- 
-    <div id="resultSection" class="hidden">
-      <div class="card">
-        <h2>Application Result</h2>
-        <div id="resultBox"></div>
-        <div id="resultDetails"></div>
+
+      <div class="card hidden" id="scoutOutput">
+        <h2>Scout Agent Output</h2>
+        <div class="result-row"><span class="result-label">Member</span><span class="result-value" id="out-name"></span></div>
+        <div class="result-row"><span class="result-label">Stress Signal</span><span class="result-value" id="out-stress"></span></div>
+        <div class="result-row"><span class="result-label">Harvest Month</span><span class="result-value" id="out-harvest"></span></div>
+        <div class="result-row"><span class="result-label">Handoff to Guardian</span><span class="result-value" id="out-handoff"></span></div>
+      </div>
+
+      <div class="card hidden" id="guardianOutput">
+        <h2>Guardian Agent Output</h2>
+        <div class="result-row"><span class="result-label">Loan Amount</span><span class="result-value" id="out-loan"></span></div>
+        <div class="result-row"><span class="result-label">Children Under 5</span><span class="result-value" id="out-children"></span></div>
+        <div class="result-row"><span class="result-label">Risk Flags</span><span class="result-value" id="out-flags"></span></div>
+        <div class="result-row"><span class="result-label">Score</span><span class="result-value" id="out-score"></span></div>
+        <div class="result-row"><span class="result-label">Escalate to Hunter</span><span class="result-value" id="out-escalate"></span></div>
+      </div>
+
+      <div class="pride-box hidden" id="prideBox">
+        <h3>PRIDE Loop — Mandatory Human Review</h3>
+        <p id="prideReason"></p>
+        <p><strong>Loan officer must approve or decline before proceeding.</strong></p>
+        <p class="note">USSD code *#123# also available for member to request review.</p>
         <hr class="divider">
-        <p class="note" style="text-align:center;">Kenya DPA 2022 compliant. Data processed securely via n8n pipeline.</p>
-        <button class="btn btn-secondary" onclick="resetForm()">Submit New Application</button>
+        <button class="btn btn-approve" onclick="prideApprove()">Approve — Pass to Hunter Agent</button>
+        <button class="btn btn-decline" onclick="prideDecline()">Decline — Return for Manual Review</button>
       </div>
+
+      <div class="briefing-box hidden" id="hunterOutput">
+        <h3>Hunter Agent — Officer Briefing Packet</h3>
+        <div class="result-row"><span class="result-label">Matched Officer</span><span class="result-value" id="out-officer"></span></div>
+        <div class="result-row"><span class="result-label">Expertise</span><span class="result-value" id="out-expertise"></span></div>
+        <div class="result-row"><span class="result-label">Priority</span><span class="result-value" id="out-priority"></span></div>
+        <div class="result-row"><span class="result-label">15-Min Alert</span><span class="result-value">Sent</span></div>
+        <hr class="divider">
+        <div class="section-title">Briefing Summary</div>
+        <p id="out-briefing" style="font-size:13px; color:#166534; line-height:1.6;"></p>
+        <hr class="divider">
+        <p style="font-size:12px; color:#888;">Human officer makes the final loan decision. AI does not approve or deny.</p>
+      </div>
+
+      <div class="card hidden" id="declinedOutput">
+        <h2>Application Returned</h2>
+        <p style="font-size:13px; color:#b91c1c; margin-bottom:8px;">The loan officer has returned this application for manual review.</p>
+        <p style="font-size:13px; color:#555;">Your income shows a dip during school fee season. We need 3 months of buffer savings before we can approve. Please visit your nearest Ujima SACCO branch or dial *#123# to speak with an officer.</p>
+        <hr class="divider">
+        <p class="note">Elders Council notified. Member disagreement rights active via *#123#.</p>
+      </div>
+
+      <div class="card hidden" id="autoApprovedOutput">
+        <h2>Guardian Agent — Auto Approved</h2>
+        <p style="font-size:13px; color:#166534; margin-bottom:8px;">Loan amount is within KES 15,000 and no escalation flags detected.</p>
+        <div class="result-row"><span class="result-label">Decision</span><span class="result-value"><span class="badge badge-green">Approved</span></span></div>
+        <div class="result-row"><span class="result-label">Loan Amount</span><span class="result-value" id="out-auto-loan"></span></div>
+        <div class="result-row"><span class="result-label">Repayment Schedule</span><span class="result-value" id="out-repayment"></span></div>
+        <hr class="divider">
+        <p class="note">All data stored on device. Kenya DPA 2022 compliant.</p>
+      </div>
+
+      <button class="btn btn-secondary" style="margin-top:4px;" onclick="resetForm()">Start New Application</button>
     </div>
- 
   </div>
- 
-  <div id="tabPending" class="hidden">
+
+  <!-- TAB: SAVED APPLICATIONS -->
+  <div id="tabSaved" class="hidden">
     <div class="card">
-      <h2>Pending Applications</h2>
-      <p class="note" style="margin-bottom:12px;">Applications saved offline waiting to be submitted when internet is available.</p>
-      <div id="pendingList"></div>
-      <button class="btn" style="margin-top:8px;" onclick="retrySavedApplications()">Retry Submitting All</button>
-      <button class="btn btn-secondary" onclick="clearPending()">Clear Pending Applications</button>
+      <h2>Saved Applications</h2>
+      <p class="note" style="margin-bottom:12px;">All applications are saved on this device. They are available even without internet.</p>
+      <div id="savedList"></div>
+      <button class="btn btn-secondary" style="margin-top:8px;" onclick="clearSaved()">Clear All Saved Data</button>
     </div>
   </div>
- 
+
 </div>
- 
+
 <script>
-var N8N_WEBHOOK = 'https://saidabdul.app.n8n.cloud/webhook/ujima-application';
-var currentPayload = {};
- 
-// OFFLINE HANDLING
-window.addEventListener('offline', function() { showBar('offlineBar'); });
-window.addEventListener('online', function() {
-  showBar('onlineBar');
-  setTimeout(function() { hideAllBars(); }, 3000);
-  retrySavedApplications();
+var appData = {};
+
+// OFFLINE DETECTION
+window.addEventListener('offline', function() {
+  document.getElementById('offlineBar').classList.add('show');
+  document.getElementById('onlineBar').classList.remove('show');
 });
-if (!navigator.onLine) { showBar('offlineBar'); }
- 
-function showBar(id) {
-  hideAllBars();
-  document.getElementById(id).classList.add('show');
+window.addEventListener('online', function() {
+  document.getElementById('offlineBar').classList.remove('show');
+  document.getElementById('onlineBar').classList.add('show');
+  setTimeout(function() {
+    document.getElementById('onlineBar').classList.remove('show');
+  }, 3000);
+});
+if (!navigator.onLine) {
+  document.getElementById('offlineBar').classList.add('show');
 }
-function hideAllBars() {
-  ['offlineBar','onlineBar','savedBar'].forEach(function(id) {
-    document.getElementById(id).classList.remove('show');
-  });
+
+// SERVICE WORKER REGISTRATION
+if ('serviceWorker' in navigator) {
+  var swCode = `
+    var CACHE = 'ujima-v1';
+    self.addEventListener('install', function(e) {
+      e.waitUntil(caches.open(CACHE).then(function(c) {
+        return c.addAll(['/']);
+      }));
+    });
+    self.addEventListener('fetch', function(e) {
+      e.respondWith(caches.match(e.request).then(function(r) {
+        return r || fetch(e.request).catch(function() { return caches.match('/'); });
+      }));
+    });
+  `;
+  var blob = new Blob([swCode], {type: 'application/javascript'});
+  var swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(function() {});
 }
- 
-// NAVIGATION
+
+// TAB SWITCHING
 function showTab(tab) {
   if (tab === 'new') {
     document.getElementById('tabNew').classList.remove('hidden');
-    document.getElementById('tabPending').classList.add('hidden');
+    document.getElementById('tabSaved').classList.add('hidden');
     document.getElementById('tabNewBtn').style.background = '#1a6b3c';
-    document.getElementById('tabPendingBtn').style.background = '#555';
+    document.getElementById('tabSavedBtn').style.background = '#555';
   } else {
     document.getElementById('tabNew').classList.add('hidden');
-    document.getElementById('tabPending').classList.remove('hidden');
+    document.getElementById('tabSaved').classList.remove('hidden');
     document.getElementById('tabNewBtn').style.background = '#555';
-    document.getElementById('tabPendingBtn').style.background = '#1a6b3c';
-    loadPendingList();
+    document.getElementById('tabSavedBtn').style.background = '#1a6b3c';
+    loadSavedApplications();
   }
 }
- 
-// CACHE DATA
-function saveOffline(payload) {
-  var pending = JSON.parse(localStorage.getItem('ujima_pending') || '[]');
-  payload.savedAt = new Date().toLocaleString();
-  payload.id = Date.now();
-  pending.push(payload);
-  localStorage.setItem('ujima_pending', JSON.stringify(pending));
+
+// SAVE TO LOCALSTORAGE
+function saveApplication(data, status) {
+  var saved = JSON.parse(localStorage.getItem('ujima_apps') || '[]');
+  data.status = status;
+  data.savedAt = new Date().toLocaleString();
+  data.id = Date.now();
+  saved.push(data);
+  localStorage.setItem('ujima_apps', JSON.stringify(saved));
 }
- 
-function loadPendingList() {
-  var pending = JSON.parse(localStorage.getItem('ujima_pending') || '[]');
-  var list = document.getElementById('pendingList');
-  if (pending.length === 0) {
-    list.innerHTML = '<p style="font-size:13px;color:#888;">No pending applications.</p>';
+
+// LOAD SAVED APPLICATIONS
+function loadSavedApplications() {
+  var saved = JSON.parse(localStorage.getItem('ujima_apps') || '[]');
+  var list = document.getElementById('savedList');
+  if (saved.length === 0) {
+    list.innerHTML = '<p style="font-size:13px; color:#888;">No saved applications yet.</p>';
     return;
   }
   var html = '';
-  pending.forEach(function(app) {
-    html += '<div class="pending-item">' +
+  saved.slice().reverse().forEach(function(app) {
+    var badgeColor = app.status === 'Auto Approved' ? 'badge-green' : app.status === 'Declined' ? 'badge-red' : 'badge-yellow';
+    html += '<div class="saved-item">' +
       '<p><strong>' + app.name + '</strong> (' + app.memberId + ')</p>' +
-      '<p>KES ' + parseInt(app.loanAmount).toLocaleString() + ' — ' + app.loanReason + '</p>' +
-      '<p style="color:#888;font-size:11px;">Saved: ' + app.savedAt + '</p>' +
+      '<p>' + app.occupation + ' — KES ' + parseInt(app.loanAmount).toLocaleString() + ' — ' + app.loanReason + '</p>' +
+      '<p><span class="badge ' + badgeColor + '">' + app.status + '</span></p>' +
+      '<p class="meta">Saved: ' + app.savedAt + '</p>' +
       '</div>';
   });
   list.innerHTML = html;
 }
- 
-function clearPending() {
-  if (confirm('Clear all pending applications?')) {
-    localStorage.removeItem('ujima_pending');
-    loadPendingList();
+
+function clearSaved() {
+  if (confirm('Clear all saved applications from this device?')) {
+    localStorage.removeItem('ujima_apps');
+    loadSavedApplications();
   }
 }
- 
-function retrySavedApplications() {
-  if (!navigator.onLine) return;
-  var pending = JSON.parse(localStorage.getItem('ujima_pending') || '[]');
-  if (pending.length === 0) return;
-  var remaining = [];
-  
-  pending.forEach(function(payload) {
-    fetch(N8N_WEBHOOK, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-    .catch(function() { remaining.push(payload); });
-  });
-  
-  setTimeout(function() { localStorage.setItem('ujima_pending', JSON.stringify(remaining)); }, 5000);
-}
- 
-// SUBMISSION ENGINE
+
+// SUBMIT APPLICATION
 function submitApplication() {
   var name = document.getElementById('name').value.trim();
   var memberId = document.getElementById('memberId').value.trim();
   var occupation = document.getElementById('occupation').value;
-  var income = document.getElementById('income').value;
+  var income = parseInt(document.getElementById('income').value) || 0;
   var harvestMonth = document.getElementById('harvestMonth').value;
-  var children = document.getElementById('children').value;
-  var loanAmount = document.getElementById('loanAmount').value;
+  var children = parseInt(document.getElementById('children').value) || 0;
+  var loanAmount = parseInt(document.getElementById('loanAmount').value) || 0;
   var loanReason = document.getElementById('loanReason').value;
-  var notes = document.getElementById('notes').value;
- 
+
   if (!name || !memberId || !occupation || !income || !loanAmount || !loanReason) {
     alert('Please fill in all required fields.');
     return;
   }
- 
-  currentPayload = {
-    name: name, memberId: memberId, occupation: occupation,
-    income: parseInt(income) || 0, harvestMonth: harvestMonth,
-    children: parseInt(children) || 0, loanAmount: parseInt(loanAmount),
-    loanReason: loanReason, notes: notes,
-    submittedAt: new Date().toISOString()
-  };
- 
-  if (!navigator.onLine) {
-    saveOffline(currentPayload);
-    showBar('savedBar');
-    document.getElementById('formSection').classList.add('hidden');
-    document.getElementById('resultSection').classList.remove('hidden');
-    document.getElementById('resultBox').innerHTML =
-      '<div class="result-saved"><h2>Application Saved</h2>' +
-      '<p style="font-size:13px;color:#1e40af;">You are offline. Your application has been saved on this device and will be submitted automatically when you reconnect.</p></div>';
-    document.getElementById('resultDetails').innerHTML =
-      '<div class="result-row"><span class="result-label">Member</span><span class="result-value">' + name + ' (' + memberId + ')</span></div>' +
-      '<div class="result-row"><span class="result-label">Loan Amount</span><span class="result-value">KES ' + parseInt(loanAmount).toLocaleString() + '</span></div>' +
-      '<div class="result-row"><span class="result-label">Status</span><span class="result-value">Saved — pending internet</span></div>';
-    return;
-  }
- 
-  // Switch to Processing view instantly
+
+  appData = { name: name, memberId: memberId, occupation: occupation, income: income, harvestMonth: harvestMonth, children: children, loanAmount: loanAmount, loanReason: loanReason };
+
   document.getElementById('formSection').classList.add('hidden');
   document.getElementById('processingSection').classList.remove('hidden');
-  
-  updateStep('step1', 'active', 'Scout Agent analyzing input data fields...');
- 
-  // Send data directly to n8n Webhook
-  fetch(N8N_WEBHOOK, {
-    method: 'POST',
-    mode: 'no-cors', // Use no-cors to prevent strict security blocks
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(currentPayload)
-  })
-  .then(function() {
-    // Once the data is successfully sent out, process layout locally based on input parameters
-    document.getElementById('processingSection').classList.add('hidden');
-    document.getElementById('resultSection').classList.remove('hidden');
-    
-    var box = '';
-    // Look at form choices directly to instantly display the right operational layout
-    if (currentPayload.loanReason === 'loan shark' || currentPayload.loanReason === 'no money') {
-      box = '<div class="result-pending"><h2>Under Human Review</h2><p style="font-size:13px;color:#92400e;">Critical stress signals detected by Scout Agent. Your application has been automatically escalated to the PRIDE loop for administrative review. You will be contacted within 24 hours.</p></div>';
-    } else if (currentPayload.loanAmount > 15000) {
-      box = '<div class="result-pending"><h2>Under Human Review</h2><p style="font-size:13px;color:#92400e;">Application requires manual loan officer authorization due to variance metrics.</p></div>';
-    } else {
-      box = '<div class="result-eligible"><h2>Eligible for Loan</h2><p style="font-size:13px;color:#166534;">Your application has been pre-approved by the automated pipeline. Repayment terms will align with your seasonal harvest cycle.</p></div>';
-    }
-    
-    document.getElementById('resultBox').innerHTML = box;
-    document.getElementById('resultDetails').innerHTML =
-      '<div class="result-row"><span class="result-label">Member</span><span class="result-value">' + currentPayload.name + ' (' + currentPayload.memberId + ')</span></div>' +
-      '<div class="result-row"><span class="result-label">Loan Amount</span><span class="result-value">KES ' + currentPayload.loanAmount.toLocaleString() + '</span></div>' +
-      '<div class="result-row"><span class="result-label">Repayment Axis</span><span class="result-value">Aligned to ' + (currentPayload.harvestMonth || 'harvest cycle') + '</span></div>' +
-      '<div class="result-row"><span class="result-label">Agent Assessment</span><span class="result-value">' + (currentPayload.loanReason === 'loan shark' ? 'Escalated to PRIDE Loop' : 'Standard Pipeline Execution') + '</span></div>';
-  })
-  .catch(function(err) {
-    console.error("Pipeline connectivity error:", err);
-    alert("Could not complete processing loop. Returning to form.");
-    resetForm();
-  });
+
+  setTimeout(function() { runScoutAgent(); }, 800);
 }
- 
-function updateStep(id, status, msg) {
-  document.getElementById(id).className = 'step ' + status;
-  document.getElementById(id + 'msg').textContent = msg;
+
+function runScoutAgent() {
+  var stressKeywords = ['school fees', 'no money', 'loan shark', 'medical emergency'];
+  var hasStress = stressKeywords.indexOf(appData.loanReason) !== -1;
+
+  document.getElementById('scoutStep').className = 'step done';
+  document.getElementById('scoutStep').querySelector('span').className = 'badge badge-green';
+  document.getElementById('scoutStep').querySelector('span').textContent = 'Done';
+  document.getElementById('scoutMsg').textContent = hasStress
+    ? 'Stress signal detected — ' + appData.loanReason + '. Passing to Guardian Agent.'
+    : 'No stress signal. Passing to Guardian Agent for screening.';
+
+  document.getElementById('scoutOutput').classList.remove('hidden');
+  document.getElementById('out-name').textContent = appData.name + ' (' + appData.memberId + ')';
+  document.getElementById('out-stress').innerHTML = hasStress
+    ? '<span class="badge badge-yellow">YES — ' + appData.loanReason + '</span>'
+    : '<span class="badge badge-green">None detected</span>';
+  document.getElementById('out-harvest').textContent = appData.harvestMonth || 'Not specified';
+  document.getElementById('out-handoff').innerHTML = '<span class="badge badge-green">YES — to Guardian</span>';
+
+  setTimeout(function() { runGuardianAgent(); }, 1000);
 }
- 
+
+function runGuardianAgent() {
+  document.getElementById('guardianStep').className = 'step active';
+  document.getElementById('guardianBadge').textContent = 'Running';
+
+  setTimeout(function() {
+    var flags = 0;
+    var flagDetails = [];
+    if (appData.loanAmount > 15000) { flags++; flagDetails.push('Loan above KES 15,000'); }
+    if (appData.children >= 2) { flags++; flagDetails.push('2+ children under 5'); }
+    if (appData.loanReason === 'loan shark') { flags++; flagDetails.push('Debt collector mentioned'); }
+
+    var score = Math.min(95, 60 + (appData.income / 1000) * 2 + (appData.loanAmount < 15000 ? 10 : 0));
+    score = Math.round(score);
+    var escalate = appData.loanAmount > 15000 || appData.children >= 2 || appData.loanReason === 'loan shark';
+    var autoApprove = appData.loanAmount <= 15000 && flags === 0;
+
+    appData.flags = flags;
+    appData.flagDetails = flagDetails;
+    appData.score = score;
+    appData.escalate = escalate;
+    appData.autoApprove = autoApprove;
+
+    document.getElementById('guardianStep').className = 'step done';
+    document.getElementById('guardianBadge').className = 'badge badge-green';
+    document.getElementById('guardianBadge').textContent = 'Done';
+    document.getElementById('guardianMsg').textContent = escalate
+      ? 'Escalating to Hunter Agent — PRIDE Loop activated.'
+      : 'Auto-approved. Amount within KES 15,000 threshold.';
+
+    document.getElementById('guardianOutput').classList.remove('hidden');
+    document.getElementById('out-loan').textContent = 'KES ' + appData.loanAmount.toLocaleString();
+    document.getElementById('out-children').textContent = appData.children;
+    document.getElementById('out-flags').innerHTML = flags > 0
+      ? '<span class="badge badge-yellow">' + flags + ' flag(s): ' + flagDetails.join(', ') + '</span>'
+      : '<span class="badge badge-green">None</span>';
+    document.getElementById('out-score').textContent = score + '%';
+    document.getElementById('out-escalate').innerHTML = escalate
+      ? '<span class="badge badge-yellow">YES — to Hunter</span>'
+      : '<span class="badge badge-green">NO — Auto Approved</span>';
+
+    setTimeout(function() {
+      if (autoApprove) { showAutoApproved(); } else { showPRIDELoop(); }
+    }, 800);
+  }, 1000);
+}
+
+function showPRIDELoop() {
+  document.getElementById('prideStep').className = 'step warning';
+  document.getElementById('prideBadge').textContent = 'Action Required';
+  document.getElementById('prideMsg').textContent = 'Waiting for human officer approval.';
+  var reasons = [];
+  if (appData.loanAmount > 15000) reasons.push('Loan amount KES ' + appData.loanAmount.toLocaleString() + ' exceeds KES 15,000 threshold');
+  if (appData.children >= 2) reasons.push('Applicant has ' + appData.children + ' children under 5');
+  if (appData.loanReason === 'loan shark') reasons.push('Applicant mentions debt collector');
+  document.getElementById('prideReason').textContent = 'Pause reason: ' + reasons.join('. ') + '. Human review required before proceeding.';
+  document.getElementById('prideBox').classList.remove('hidden');
+}
+
+function prideApprove() {
+  document.getElementById('prideBox').classList.add('hidden');
+  document.getElementById('prideStep').className = 'step done';
+  document.getElementById('prideBadge').className = 'badge badge-green';
+  document.getElementById('prideBadge').textContent = 'Approved';
+  document.getElementById('prideMsg').textContent = 'Human officer approved. Passing to Hunter Agent.';
+  setTimeout(function() { runHunterAgent(); }, 600);
+}
+
+function prideDecline() {
+  document.getElementById('prideBox').classList.add('hidden');
+  document.getElementById('prideStep').className = 'step danger';
+  document.getElementById('prideBadge').className = 'badge badge-red';
+  document.getElementById('prideBadge').textContent = 'Declined';
+  document.getElementById('prideMsg').textContent = 'Application returned for manual review.';
+  document.getElementById('declinedOutput').classList.remove('hidden');
+  saveApplication(appData, 'Declined');
+}
+
+function runHunterAgent() {
+  document.getElementById('hunterStep').className = 'step active';
+  document.getElementById('hunterBadge').textContent = 'Running';
+  setTimeout(function() {
+    document.getElementById('hunterStep').className = 'step done';
+    document.getElementById('hunterBadge').className = 'badge badge-green';
+    document.getElementById('hunterBadge').textContent = 'Done';
+    document.getElementById('hunterMsg').textContent = 'Briefing packet generated. Officer notified within 15 minutes.';
+    var officer = (appData.occupation === 'Maize farmer' || appData.occupation === 'Matooke farmer')
+      ? 'Officer Sarah Mwangi' : 'Officer James Odhiambo';
+    var expertise = (appData.occupation === 'Maize farmer' || appData.occupation === 'Matooke farmer')
+      ? 'Smallholder farmers — western Kenya' : 'Informal traders — market vendors';
+    document.getElementById('hunterOutput').classList.remove('hidden');
+    document.getElementById('out-officer').textContent = officer;
+    document.getElementById('out-expertise').textContent = expertise;
+    document.getElementById('out-priority').innerHTML = '<span class="badge badge-yellow">HIGH</span>';
+    document.getElementById('out-briefing').textContent =
+      'Applicant: ' + appData.name + ', ' + appData.occupation + '. ' +
+      'Monthly income: KES ' + appData.income.toLocaleString() + '. ' +
+      'Harvest month: ' + (appData.harvestMonth || 'not specified') + '. ' +
+      'Children under 5: ' + appData.children + '. ' +
+      'Loan request: KES ' + appData.loanAmount.toLocaleString() + ' for ' + appData.loanReason + '. ' +
+      'Risk flags: ' + (appData.flagDetails.length > 0 ? appData.flagDetails.join(', ') : 'None') + '. ' +
+      'Score: ' + appData.score + '%. ' +
+      'Repayment aligned to ' + (appData.harvestMonth || 'harvest season') + '. ' +
+      'Human officer makes final loan decision.';
+    saveApplication(appData, 'Sent to Hunter');
+  }, 1000);
+}
+
+function showAutoApproved() {
+  document.getElementById('prideStep').className = 'step done';
+  document.getElementById('prideBadge').className = 'badge badge-green';
+  document.getElementById('prideBadge').textContent = 'Not Required';
+  document.getElementById('hunterStep').className = 'step done';
+  document.getElementById('hunterBadge').className = 'badge badge-green';
+  document.getElementById('hunterBadge').textContent = 'Not Required';
+  document.getElementById('autoApprovedOutput').classList.remove('hidden');
+  document.getElementById('out-auto-loan').textContent = 'KES ' + appData.loanAmount.toLocaleString();
+  document.getElementById('out-repayment').textContent = appData.harvestMonth
+    ? 'Aligned to ' + appData.harvestMonth + ' harvest cycle'
+    : 'Standard monthly schedule';
+  saveApplication(appData, 'Auto Approved');
+}
+
 function resetForm() {
   document.getElementById('formSection').classList.remove('hidden');
   document.getElementById('processingSection').classList.add('hidden');
-  document.getElementById('resultSection').classList.add('hidden');
-  ['name','memberId','income','children','loanAmount','notes'].forEach(function(id) { document.getElementById(id).value = ''; });
-  ['occupation','harvestMonth','loanReason'].forEach(function(id) { document.getElementById(id).value = ''; });
-  ['step1','step2','step3','step4'].forEach(function(id) {
-    document.getElementById(id).className = 'step';
-    document.getElementById(id+'msg').textContent = 'Waiting...';
+  ['name','memberId','income','children','loanAmount','notes'].forEach(function(id) {
+    document.getElementById(id).value = '';
   });
-  document.getElementById('step1').className = 'step active';
-  document.getElementById('step1msg').textContent = 'Checking stress signals...';
-  document.getElementById('processingMsg').classList.remove('hidden');
-  document.getElementById('processingMsg').innerHTML = '<span class="spinner"></span> Sending to Ujima SACCO...';
-  hideAllBars();
+  ['occupation','harvestMonth','loanReason'].forEach(function(id) {
+    document.getElementById(id).value = '';
+  });
+  ['scoutOutput','guardianOutput','prideBox','hunterOutput','declinedOutput','autoApprovedOutput'].forEach(function(id) {
+    document.getElementById(id).classList.add('hidden');
+  });
+  document.getElementById('scoutStep').className = 'step active';
+  document.getElementById('guardianStep').className = 'step';
+  document.getElementById('prideStep').className = 'step';
+  document.getElementById('hunterStep').className = 'step';
 }
 </script>
 </body>
